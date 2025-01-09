@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import '../helpers/lesson_plan_helper.dart';
-import '../helpers/student_batch_helper.dart';
+import '../../helpers/lesson_plan_helper.dart';
+import '../../helpers/student_batch_helper.dart';
 
-import '../Utils/ui_utils.dart';
-import '../helpers/batch_helper.dart';
-import '../models/batch.dart';
-import '../models/student.dart';
+import '../../Utils/ui_utils.dart';
+import '../../helpers/batch_helper.dart';
+import '../../models/batch.dart';
+import '../../models/student.dart';
 
 class LessonPlanPage extends StatefulWidget {
   const LessonPlanPage({super.key});
@@ -89,7 +89,6 @@ class LessonPlanPageState extends State<LessonPlanPage> {
         _selectedStudent != null &&
         _lessons.isNotEmpty &&
         !_listEquals(_lessons, _originalLessons);
-    ;
   }
 
   bool _listEquals(List<String> list1, List<String> list2) {

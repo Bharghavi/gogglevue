@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import '../Utils/TimeOfDayUtils.dart';
 
 class Batch {
   final String? id;
@@ -40,18 +41,9 @@ class Batch {
       'instructor': instructor,
       'notes': notes,
       'scheduleDays': scheduleDays,
-      'startTime': timeOfDayToString(startTime),
-      'endTime': timeOfDayToString(endTime),
+      'startTime': TimeOfDayUtils.timeOfDayToString(startTime),
+      'endTime': TimeOfDayUtils.timeOfDayToString(endTime),
     };
-  }
-
-  static String timeOfDayToString(TimeOfDay time) {
-    return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
-  }
-
-  static TimeOfDay stringToTimeOfDay(String timeString) {
-    final parts = timeString.split(':');
-    return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
   }
 
   // Factory method to create a Batch instance from a Map
@@ -67,8 +59,8 @@ class Batch {
       instructor: map['instructor'] ?? '',
       notes: map['notes'] ?? '',
       scheduleDays: List<String>.from(map['scheduleDays']),
-      startTime: stringToTimeOfDay(map['startTime']),
-      endTime: stringToTimeOfDay(map['endTime']),
+      startTime: TimeOfDayUtils.stringToTimeOfDay(map['startTime']),
+      endTime: TimeOfDayUtils.stringToTimeOfDay(map['endTime']),
     );
   }
 }

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../Utils/ui_utils.dart';
-import '../models/batch.dart';
-import '../models/student.dart';
-import '../helpers/student_batch_helper.dart';
+import '../../Utils/ui_utils.dart';
+import '../../models/batch.dart';
+import '../../models/student.dart';
+import '../../helpers/student_batch_helper.dart';
 
 class StudentBatchPage extends StatefulWidget {
   final Batch batch;

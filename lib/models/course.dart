@@ -37,8 +37,6 @@ class Course {
         return 'academics';
       case Category.sports:
         return 'sports';
-      default:
-        return 'academics';
     }
   }
 

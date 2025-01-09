@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import '../managers/login_manager.dart';
+import '../../managers/login_manager.dart';
 import 'batch_page.dart';
 import 'staff_page.dart';
 import 'course_page.dart';
 import 'student_page.dart';
 import 'lesson_plan_page.dart';
 import 'payment_page.dart';
+import 'admin_home_page.dart';
 
 class AdminHomePage extends StatefulWidget {
   const AdminHomePage({super.key});
@@ -127,15 +128,6 @@ class AdminHomepageState extends State<AdminHomePage> {
         ),
       ),
     );
-  }
-}
-
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(child: Text('This page is under construction'));
   }
 }
 

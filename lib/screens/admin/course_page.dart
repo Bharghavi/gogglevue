@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../models/course.dart';
-import '../helpers/course_helper.dart';
-import '../Utils/ui_utils.dart';
+import '../../models/course.dart';
+import '../../helpers/course_helper.dart';
+import '../../Utils/ui_utils.dart';
 
 // CoursePage.dart
 class CoursePage extends StatefulWidget {

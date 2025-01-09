@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import '../helpers/course_helper.dart';
-import '../helpers/staff_helper.dart';
-import '../models/batch.dart';
-import '../helpers/batch_helper.dart';
-import '../Utils/ui_utils.dart';
-import '../models/course.dart';
-import '../models/staff.dart';
+import '../../helpers/course_helper.dart';
+import '../../helpers/staff_helper.dart';
+import '../../models/batch.dart';
+import '../../helpers/batch_helper.dart';
+import '../../Utils/ui_utils.dart';
+import '../../models/course.dart';
+import '../../models/staff.dart';
 import 'student_batch_page.dart';
 
 class BatchPage extends StatefulWidget {

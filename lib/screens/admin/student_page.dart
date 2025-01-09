@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../models/student.dart';
-import '../helpers/student_helper.dart';
-import '../Utils/ui_utils.dart';
+import '../../models/student.dart';
+import '../../helpers/student_helper.dart';
+import '../../Utils/ui_utils.dart';
 
 class StudentPage extends StatefulWidget {
   const StudentPage({super.key});

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../models/staff.dart';
-import '../helpers/staff_helper.dart';
-import '../Utils/ui_utils.dart';
+import '../../models/staff.dart';
+import '../../helpers/staff_helper.dart';
+import '../../Utils/ui_utils.dart';
 
 class StaffPage extends StatefulWidget {
   const StaffPage({Key? key}) : super(key: key);

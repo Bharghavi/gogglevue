@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'admin_home.dart';
-import 'staff/staff_home.dart';
-import 'student/student_home.dart';
-import '../managers/login_manager.dart';
-import '../constants.dart';
+import '../staff/staff_home.dart';
+import '../student/student_home.dart';
+import '../../managers/login_manager.dart';
+import '../../constants.dart';
 import 'registration_page.dart';
 
 class LoginPage extends StatefulWidget {
