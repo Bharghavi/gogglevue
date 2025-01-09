@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../helpers/admin_helper.dart';
 import '../helpers/batch_helper.dart';
+import '../models/batch.dart';
 import '../models/student.dart';
 import '../models/student_batch.dart';
 import '../constants.dart';
@@ -74,5 +75,22 @@ class StudentBatchHelper {
     await BatchHelper.updateStudentCount(batchId, 1);
     await FirebaseFirestore.instance.collection(K.studentBatchCollection).add(newStudent.toMap());
     return newStudent;
+  }
+
+  static Future<List<Batch>> getBatchesForStudent(String studentId) async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection(K.studentBatchCollection)
+        .where(K.studentId, isEqualTo: studentId)
+        .get();
+
+    List<Batch> result = await Future.wait(querySnapshot.docs.map((doc) async {
+      DocumentSnapshot batchSnapshot = await FirebaseFirestore.instance
+          .collection(K.batchCollection)
+          .doc(doc[K.batchId])
+          .get();
+      return Batch.fromFirestore(batchSnapshot);
+    }).toList());
+
+    return result;
   }
 }
