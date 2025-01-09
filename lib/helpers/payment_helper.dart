@@ -62,4 +62,41 @@ class PaymentHelper {
     return result;
   }
 
+  static Future<List<Payment>> fetchAllPayments() async {
+    List<Payment> result = [];
+    String adminId = await AdminHelper.getLoggedAdminUserId();
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection(K.paymentCollection)
+        .where(K.adminId, isEqualTo: adminId)
+        .orderBy(K.paymentDate, descending: true)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      result = querySnapshot.docs.map((doc) {
+        return Payment.fromFirestore(doc);
+      }).toList();
+
+    }
+    return result;
+  }
+
+  static Future<List<Payment>> fetchPaymentsForStudent(String studentId) async {
+    List<Payment> result = [];
+    String adminId = await AdminHelper.getLoggedAdminUserId();
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection(K.paymentCollection)
+        .where(K.adminId, isEqualTo: adminId)
+        .where(K.studentId, isEqualTo: studentId)
+        .orderBy(K.paymentDate, descending: true)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      result = querySnapshot.docs.map((doc) {
+        return Payment.fromFirestore(doc);
+      }).toList();
+
+    }
+    return result;
+  }
+
 }

@@ -288,10 +288,14 @@ class AddBatchPageState extends State<AddBatchPage> {
           startTime!,
           endTime!);
 
-      UIUtils.showMessage(context, 'Batch saved successfully');
-      Navigator.pop(context, newBatch);
+      if (mounted) {
+        UIUtils.showMessage(context, 'Batch saved successfully');
+        Navigator.pop(context, newBatch);
+      }
     } catch (e) {
-      UIUtils.showErrorDialog(context, 'Error saving batch','$e');
+      if (mounted) {
+        UIUtils.showErrorDialog(context, 'Error saving batch', '$e');
+      }
     }
 
   }

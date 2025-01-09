@@ -18,6 +18,7 @@ class StudentBatchPageState extends State<StudentBatchPage> {
   List<Student> studentsNotInBatch = [];
   Student? selectedStudent;
   DateTime? joiningDate;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -27,19 +28,27 @@ class StudentBatchPageState extends State<StudentBatchPage> {
 
   Future<void> fetchStudentsForBatch() async {
     try {
+      setState(() {
+        isLoading = true;
+      });
       final studentList = await StudentBatchHelper.fetchAllStudentsFor(widget.batch.id!);
       final fetchStudentsNotInBatch = await StudentBatchHelper.fetchAllStudentsNotInBatch(widget.batch.id!);
 
       setState(() {
         studentsNotInBatch.addAll(fetchStudentsNotInBatch);
         studentsInBatch.addAll(studentList);
+        isLoading = false;
       });
 
     } catch (e) {
-      print(e);
-      if (mounted) {
-        UIUtils.showMessage(context, 'Failed to fetch student: $e');
-      }
+      setState(() {
+        isLoading = false;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          UIUtils.showMessage(context, 'Failed to fetch student: $e');
+        }
+      });
     }
   }
 
@@ -114,6 +123,9 @@ class StudentBatchPageState extends State<StudentBatchPage> {
 
   void _addStudentAction() async {
     if (selectedStudent != null && joiningDate != null) {
+      setState(() {
+        isLoading = true;
+      });
       try {
         await StudentBatchHelper.addStudentToBatch(
           selectedStudent!.id!,
@@ -124,11 +136,16 @@ class StudentBatchPageState extends State<StudentBatchPage> {
           widget.batch.studentCount += 1;
           studentsInBatch.add(selectedStudent!);
           studentsNotInBatch.remove(selectedStudent);
+          isLoading = false;
         });
         if (mounted) {
           UIUtils.showMessage(context, 'Student added successfully.');
         }
+
       } catch (e) {
+        setState(() {
+          isLoading = false;
+        });
         if (mounted) {
           UIUtils.showMessage(context, 'Failed to add student: $e');
         }
@@ -153,24 +170,34 @@ class StudentBatchPageState extends State<StudentBatchPage> {
       appBar: AppBar(
         title: Text('Students in ${widget.batch.name}'),
       ),
-      body: studentsInBatch.isEmpty
-          ? Center(child: Text('No students added yet.'))
-          : ListView.builder(
-        itemCount: studentsInBatch.length,
-        itemBuilder: (context, index) {
-          final student = studentsInBatch[index];
-          return Card(
-            margin: EdgeInsets.all(8),
-            child: ListTile(
-              title: Text(student.name),
-              subtitle: Text('Address: ${student.address}'),
-              trailing: IconButton(
-                icon: Icon(Icons.delete),
-                onPressed: () => _removeStudent(student),
-              ),
+      body: isLoading ? Center(
+        child: CircularProgressIndicator(),
+      ) : Stack(
+        children: [
+          studentsInBatch.isEmpty
+              ? Center(child: Text('No students added yet.'))
+              : ListView.builder(
+            itemCount: studentsInBatch.length,
+            itemBuilder: (context, index) {
+              final student = studentsInBatch[index];
+              return Card(
+                margin: EdgeInsets.all(8),
+                child: ListTile(
+                  title: Text(student.name),
+                  subtitle: Text('Address: ${student.address}'),
+                  trailing: IconButton(
+                    icon: Icon(Icons.delete),
+                    onPressed: () => _removeStudent(student),
+                  ),
+                ),
+              );
+            },
+          ),
+          if (isLoading)
+            Center(
+              child: CircularProgressIndicator(),
             ),
-          );
-        },
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addStudent,
