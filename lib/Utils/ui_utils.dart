@@ -28,4 +28,41 @@ class UIUtils {
       ),
     );
   }
+
+  static Future<void> showConfirmationDialog({
+    required BuildContext context,
+    required String title,
+    required String content,
+    String confirmText = 'Delete',
+    required VoidCallback onConfirm,
+    String cancelText = 'Cancel',
+  }) {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(content),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text(cancelText),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                onConfirm(); // Perform the confirmation action
+              },
+              child: Text(
+                confirmText,
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }

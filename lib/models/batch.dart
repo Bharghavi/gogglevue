@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import '../Utils/TimeOfDayUtils.dart';
+import '../Utils/time_of_day_utils.dart';
 
 class Batch {
   final String? id;

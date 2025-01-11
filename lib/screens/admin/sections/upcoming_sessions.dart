@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../helpers/upcoming_sessions_helper.dart';
-import '../../../Utils/TimeOfDayUtils.dart';
+import '../../../Utils/time_of_day_utils.dart';
 import '../../../models/batch.dart';
 import '../student_batch_page.dart';
 

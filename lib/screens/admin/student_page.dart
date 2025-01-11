@@ -215,36 +215,18 @@ class StudentPageState extends State<StudentPage> {
     );
   }
   void deleteStudent(int index) {
-    showDialog(
+    UIUtils.showConfirmationDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Delete Student'),
-          content: Text('Are you sure you want to delete ${students[index].name}?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                StudentHelper.deleteStudent(students[index]);
-                setState(() {
-                  students.removeAt(index);
-                });
-                Navigator.of(context).pop(); // Close the dialog
-                UIUtils.showMessage(context, 'Student deleted successfully');
-              },
-              child: Text(
-                'Delete',
-                style: TextStyle(color: Colors.red),
-              ),
-            ),
-          ],
-        );
-      },
+      title: 'Delete Student',
+      content: 'Are you sure you want to delete ${students[index].name}?',
+      onConfirm: () {
+            StudentHelper.deleteStudent(students[index]);
+            setState(() {
+              students.removeAt(index);
+            });
+
+            UIUtils.showMessage(context, 'Student deleted successfully');
+          }
     );
   }
 

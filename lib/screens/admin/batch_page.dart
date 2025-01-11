@@ -141,21 +141,32 @@ class BatchPageState extends State<BatchPage> {
   }
 
   void _deleteBatch(int index) {
-    if (batches[index].studentCount > 0) {
-      UIUtils.showErrorDialog(
-          context, 'Delete Error','Cannot delete batch with existing students.');
-      return;
-    }
-    BatchHelper.deleteBatch(batches[index]).then((_) {
-      setState(() {
-        batches.removeAt(index);
-      });
-      if (mounted) {
-        UIUtils.showMessage(context, 'Batch deleted successfully');
-      }
-    }).catchError((e) {
-      UIUtils.showErrorDialog(context, 'Error occurred','$e');
-    });
+    UIUtils.showConfirmationDialog(context: context,
+        title: 'Delete batch',
+        content: 'Are you sure you want to delete the batch ${batches[index].name}',
+        onConfirm: () {
+          if (batches[index].studentCount > 0) {
+            if (mounted) {
+              UIUtils.showErrorDialog(
+                  context, 'Delete Error',
+                  'Cannot delete batch with existing students.');
+            }
+            return;
+          }
+          BatchHelper.deleteBatch(batches[index]).then((_) {
+            setState(() {
+              batches.removeAt(index);
+            });
+            if (mounted) {
+              UIUtils.showMessage(context, 'Batch deleted successfully');
+            }
+          }).catchError((e) {
+            if (mounted) {
+              UIUtils.showErrorDialog(context, 'Error occurred', '$e');
+            }
+          });
+        }
+    );
   }
 }
 
