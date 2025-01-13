@@ -31,4 +31,9 @@ class StaffHelper {
     await FirebaseFirestore.instance.collection(K.staffCollection).add(newStaff.toMap());
     return newStaff;
   }
+
+  static Future<void> deleteStaff(Staff staff) async {
+    final staffDocRef = FirebaseFirestore.instance.collection(K.staffCollection).doc(staff.id);
+    staffDocRef.delete();
+  }
 }

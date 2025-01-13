@@ -30,7 +30,7 @@ class StudentHelper {
     studentDocRef.delete();
   }
 
-  static Future<Student> saveNewStudent(String name,DateTime dob, String address, String phone, String email) async{
+  static Future<Student> saveNewStudent(String name, String email, String phone, String address, DateTime dob) async{
     String adminId = await AdminHelper.getLoggedAdminUserId();
     Student newStudent = Student(
         adminId: adminId,

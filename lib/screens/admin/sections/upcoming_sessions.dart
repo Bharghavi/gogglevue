@@ -33,7 +33,6 @@ class UpcomingSessionsSectionState extends State<UpcomingSessionsSection> {
         sessions = batchForToday;
       });
     } catch (e) {
-      print("Error fetching sessions: $e");
       setState(() {
         sessions = []; // Reset sessions in case of an error
       });

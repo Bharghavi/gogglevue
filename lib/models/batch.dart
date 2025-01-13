@@ -14,6 +14,7 @@ class Batch {
   final List<String> scheduleDays;
   final TimeOfDay startTime;
   final TimeOfDay endTime;
+  final String address;
 
 
   Batch({
@@ -27,7 +28,8 @@ class Batch {
     this.notes = '',
     required this.scheduleDays,
     required this.startTime,
-    required this.endTime
+    required this.endTime,
+    required this.address,
   });
 
   // Method to convert Batch to a Map for database storage (e.g., Firebase)
@@ -43,6 +45,7 @@ class Batch {
       'scheduleDays': scheduleDays,
       'startTime': TimeOfDayUtils.timeOfDayToString(startTime),
       'endTime': TimeOfDayUtils.timeOfDayToString(endTime),
+      'address': address,
     };
   }
 
@@ -61,6 +64,7 @@ class Batch {
       scheduleDays: List<String>.from(map['scheduleDays']),
       startTime: TimeOfDayUtils.stringToTimeOfDay(map['startTime']),
       endTime: TimeOfDayUtils.stringToTimeOfDay(map['endTime']),
+      address: map['address'],
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../models/staff.dart';
 import '../../helpers/staff_helper.dart';
 import '../../Utils/ui_utils.dart';
@@ -135,6 +136,44 @@ class StaffPageState extends State<StaffPage> {
     );
   }
 
+  void _removeStaff(Staff staff) async {
+    UIUtils.showConfirmationDialog(context: context,
+        title: 'Remove Staff',
+        content: 'Are you sure you want to delete ${staff.name}?',
+        onConfirm: () {
+          StaffHelper.deleteStaff(staff).then((_) {
+            setState(() {
+              staffList.remove(staff);
+            });
+            if (mounted) {
+              UIUtils.showMessage(context, 'Staff deleted successfully');
+            }
+          });
+        });
+  }
+
+  void _makeCall(String phoneNumber) async {
+    final uri = Uri(scheme: 'tel', path: phoneNumber);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      if(mounted) {
+        UIUtils.showErrorDialog(context, 'Error', 'Error occurred, please try later');
+      }
+    }
+  }
+
+  void _sendMessage(String phoneNumber) async {
+    final uri = Uri.parse('https://wa.me/$phoneNumber');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      if(mounted) {
+        UIUtils.showErrorDialog(context, 'Error', 'Error occurred, please try later');
+      }
+    }
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
@@ -167,13 +206,29 @@ class StaffPageState extends State<StaffPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Email: ${staff.email}'),
-                      Text('Phone: ${staff.phone}'),
                       Text('Address: ${staff.address}'),
                       Text('DOB: ${staff.dob.toLocal().toString().split(' ')[0]}'),
                     ],
                   ),
                   isThreeLine: true,
                   leading: Icon(Icons.person),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min, // Ensures the row takes up minimal space
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.call, color: Colors.green),
+                        onPressed: () => _makeCall(staff.phone),
+                      ),
+                      IconButton(
+                        icon: Icon(color: Colors.blue, Icons.message_rounded),
+                        onPressed: () => _sendMessage(staff.phone),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.delete, color: Colors.red),
+                        onPressed: () => _removeStaff(staff),
+                      ),
+                    ],
+                  ),
                 );
               },
             ),

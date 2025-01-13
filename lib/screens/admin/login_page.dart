@@ -105,88 +105,94 @@ class LoginPageState extends State<LoginPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Add logo here
-            Center(
-              child: Image.asset(
-                K.logoImagePath, // Make sure the image path is correct
-                height: 120, // Adjust the size as needed
+        child: SingleChildScrollView( // Wrap the Column
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).size.height -
+                  Scaffold.of(context).appBarMaxHeight!, // Ensure the content spans the screen
+            ),
+            child: IntrinsicHeight( // Ensure children take the appropriate height
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Image.asset(
+                      K.logoImagePath,
+                      height: 120,
+                    ),
+                  ),
+                  const SizedBox(height: 24.0),
+                  DropdownButton<String>(
+                    value: _selectedRole,
+                    items: [K.roleAdmin, K.roleStaff, K.roleStudent]
+                        .map((role) => DropdownMenuItem(
+                      value: role,
+                      child: Text(role),
+                    ))
+                        .toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedRole = value!;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16.0),
+                  TextField(
+                    controller: _usernameController,
+                    decoration: const InputDecoration(
+                      labelText: K.usernameLabel,
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16.0),
+                  TextField(
+                    controller: _passwordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: K.passwordLabel,
+                      border: OutlineInputBorder(),
+                    ),
+                    onSubmitted: (_) {
+                      _login();
+                    },
+                  ),
+                  const SizedBox(height: 24.0),
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: rememberMe,
+                        onChanged: (value) {
+                          setState(() {
+                            rememberMe = value!;
+                          });
+                        },
+                      ),
+                      const Text("Remember Me"),
+                    ],
+                  ),
+                  if (_selectedRole == K.roleAdmin) ...[
+                    ElevatedButton(
+                      onPressed: _login,
+                      child: const Text(K.loginButton),
+                    ),
+                    const SizedBox(height: 8.0),
+                    ElevatedButton(
+                      onPressed: _register,
+                      child: const Text(K.registerButton),
+                    ),
+                  ] else ...[
+                    ElevatedButton(
+                      onPressed: _login,
+                      child: const Text(K.loginButton),
+                    ),
+                  ],
+                ],
               ),
             ),
-            const SizedBox(height: 24.0),
-            DropdownButton<String>(
-              value: _selectedRole,
-              items: [K.roleAdmin, K.roleStaff, K.roleStudent]
-                  .map((role) =>
-                  DropdownMenuItem(
-                    value: role,
-                    child: Text(role),
-                  ))
-                  .toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedRole = value!;
-                });
-              },
-            ),
-            const SizedBox(height: 16.0),
-            TextField(
-              controller: _usernameController,
-              decoration: const InputDecoration(
-                labelText: K.usernameLabel,
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16.0),
-            TextField(
-              controller: _passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: K.passwordLabel,
-                border: OutlineInputBorder(),
-              ),
-              onSubmitted: (_) {
-                _login();
-              },
-            ),
-            const SizedBox(height: 24.0),
-
-            Row(
-              children: [
-                Checkbox(
-                  value: rememberMe,
-                  onChanged: (value) {
-                    setState(() {
-                      rememberMe = value!;
-                    });
-                  },
-                ),
-                const Text("Remember Me"),
-              ],
-            ),
-
-            if (_selectedRole == K.roleAdmin) ...[
-              ElevatedButton(
-                onPressed: _login,
-                child: const Text(K.loginButton),
-              ),
-              const SizedBox(height: 8.0),
-              ElevatedButton(
-                onPressed: _register,
-                child: const Text(K.registerButton),
-              ),
-            ] else
-              ...[
-                ElevatedButton(
-                  onPressed: _login,
-                  child: const Text(K.loginButton),
-                ),
-              ],
-          ],
+          ),
         ),
       ),
     );
   }
+
 }

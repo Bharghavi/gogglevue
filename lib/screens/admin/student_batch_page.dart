@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gogglevue/Utils/time_of_day_utils.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../Utils/ui_utils.dart';
 import '../../models/batch.dart';
 import '../../models/student.dart';
@@ -155,13 +157,43 @@ class StudentBatchPageState extends State<StudentBatchPage> {
 
 
   void _removeStudent(Student student) async {
-    setState(() {
-      studentsInBatch.remove(student);
-      studentsNotInBatch.add(student);
-      widget.batch.studentCount -= 1;
+    UIUtils.showConfirmationDialog(context: context,
+        title: 'Remove Student',
+        content: 'Are you sure you want to remove ${student.name} from batch?',
+        onConfirm: () {
+        StudentBatchHelper.deleteStudentFromBatch(student.id!, widget.batch.id!).then((_) {
+          setState(() {
+            studentsInBatch.remove(student);
+            studentsNotInBatch.add(student);
+            widget.batch.studentCount -= 1;
+          });
+          if (mounted) {
+            UIUtils.showMessage(context, 'Student removed successfully');
+          }
+        });
     });
+  }
 
-    await StudentBatchHelper.deleteStudentFromBatch(student.id!, widget.batch.id!);
+  void _makeCall(String phoneNumber) async {
+    final uri = Uri(scheme: 'tel', path: phoneNumber);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      if(mounted) {
+        UIUtils.showErrorDialog(context, 'Error', 'Error occurred, please try later');
+      }
+    }
+  }
+
+  void _sendMessage(String phoneNumber) async {
+    final uri = Uri.parse('https://wa.me/$phoneNumber');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      if(mounted) {
+        UIUtils.showErrorDialog(context, 'Error', 'Error occurred, please try later');
+      }
+    }
   }
 
   @override
@@ -170,28 +202,78 @@ class StudentBatchPageState extends State<StudentBatchPage> {
       appBar: AppBar(
         title: Text('Students in ${widget.batch.name}'),
       ),
-      body: isLoading ? Center(
+      body: isLoading
+          ? Center(
         child: CircularProgressIndicator(),
-      ) : Stack(
+      )
+          : Stack(
         children: [
-          studentsInBatch.isEmpty
-              ? Center(child: Text('No students added yet.'))
-              : ListView.builder(
-            itemCount: studentsInBatch.length,
-            itemBuilder: (context, index) {
-              final student = studentsInBatch[index];
-              return Card(
-                margin: EdgeInsets.all(8),
-                child: ListTile(
-                  title: Text(student.name),
-                  subtitle: Text('Address: ${student.address}'),
-                  trailing: IconButton(
-                    icon: Icon(Icons.delete),
-                    onPressed: () => _removeStudent(student),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Batch details section
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Card(
+                  elevation: 4,
+                  margin: EdgeInsets.all(8),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Batch Details',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Text('Location: ${widget.batch.address}'),
+                        Text('Days: ${widget.batch.scheduleDays.join(", ")}'),
+                        Text('Time: ${TimeOfDayUtils.timeOfDayToString(widget.batch.startTime)} - ${TimeOfDayUtils.timeOfDayToString(widget.batch.endTime)}'),
+                      ],
+                    ),
                   ),
                 ),
-              );
-            },
+              ),
+              // Students list section
+              Expanded(
+                child: studentsInBatch.isEmpty
+                    ? Center(child: Text('No students added yet.'))
+                    : ListView.builder(
+                  itemCount: studentsInBatch.length,
+                  itemBuilder: (context, index) {
+                    final student = studentsInBatch[index];
+                    return Card(
+                      margin: EdgeInsets.all(8),
+                      child: ListTile(
+                        title: Text(student.name),
+                        subtitle: Text('Address: ${student.address}'),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min, // Ensures the row takes up minimal space
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.call, color: Colors.green),
+                              onPressed: () => _makeCall(student.phone),
+                            ),
+                            IconButton(
+                              icon: Icon(color: Colors.blue, Icons.message_rounded),
+                              onPressed: () => _sendMessage(student.phone),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.delete, color: Colors.red),
+                              onPressed: () => _removeStudent(student),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
           if (isLoading)
             Center(

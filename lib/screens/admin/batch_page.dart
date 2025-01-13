@@ -41,7 +41,7 @@ class BatchPageState extends State<BatchPage> {
         isLoading = false;
       });
       if (mounted) {
-        UIUtils.showErrorDialog(context, 'Error while fetching staff', '$e');
+        UIUtils.showErrorDialog(context, 'Error while fetching batch', '$e');
       }
     }
   }
@@ -183,6 +183,7 @@ class AddBatchPageState extends State<AddBatchPage> {
   final TextEditingController _endTimeController = TextEditingController();
   TimeOfDay? startTime;
   TimeOfDay? endTime;
+  final TextEditingController _addressController = TextEditingController();
 
   String? selectedInstructorId;
   String? selectedCourseId;
@@ -297,7 +298,8 @@ class AddBatchPageState extends State<AddBatchPage> {
           '',
           selectedDays,
           startTime!,
-          endTime!);
+          endTime!,
+          _addressController.text);
 
       if (mounted) {
         UIUtils.showMessage(context, 'Batch saved successfully');
@@ -372,6 +374,15 @@ class AddBatchPageState extends State<AddBatchPage> {
                     selectedCourseId = value;
                   });
                 },
+              ),
+              SizedBox(height: 16),
+
+              TextField(
+                controller: _addressController,
+                decoration: InputDecoration(
+                  labelText: 'Location',
+                  border: OutlineInputBorder(),
+                ),
               ),
               SizedBox(height: 16),
 

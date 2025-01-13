@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../models/student.dart';
 import '../../helpers/student_helper.dart';
 import '../../Utils/ui_utils.dart';
@@ -37,7 +38,7 @@ class StudentPageState extends State<StudentPage> {
       DateTime dob) async {
     try {
       final newStudent =
-      await StudentHelper.saveNewStudent(name, dob, phone, address, email );
+      await StudentHelper.saveNewStudent(name, email, phone, address, dob);
       setState(() {
         students.add(newStudent);
       });
@@ -140,6 +141,28 @@ class StudentPageState extends State<StudentPage> {
     );
   }
 
+  void _makeCall(String phoneNumber) async {
+    final uri = Uri(scheme: 'tel', path: phoneNumber);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      if(mounted) {
+        UIUtils.showErrorDialog(context, 'Error', 'Error occurred, please try later');
+      }
+    }
+  }
+
+  void _sendMessage(String phoneNumber) async {
+    final uri = Uri.parse('https://wa.me/$phoneNumber');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      if(mounted) {
+        UIUtils.showErrorDialog(context, 'Error', 'Error occurred, please try later');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -186,16 +209,22 @@ class StudentPageState extends State<StudentPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
+                          icon: Icon(Icons.call, color: Colors.green),
+                          onPressed: () => _makeCall(student.phone),
+                        ),
+                        IconButton(
+                          icon: Icon(color: Colors.blue, Icons.message_rounded),
+                          onPressed: () => _sendMessage(student.phone),
+                        ),
+                        IconButton(
                           icon: Icon(Icons.edit, color: Colors.blue),
                           onPressed: () {
-                            // Call the edit function
                             showEditStudentDialog(student, index);
                           },
                         ),
                         IconButton(
                           icon: Icon(Icons.delete, color: Colors.red),
                           onPressed: () {
-                            // Call the delete function
                             deleteStudent(index);
                           },
                         ),
