@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gogglevue/Utils/ui_utils.dart';
 import 'admin_home.dart';
 import '../staff/staff_home.dart';
 import '../student/student_home.dart';
@@ -31,16 +32,19 @@ class LoginPageState extends State<LoginPage> {
     final password = _passwordController.text;
     final role = _selectedRole;
 
-    // Invoke login method from LoginManager
     try {
       final loginSuccess = await LoginManager.login(username, password, role, rememberMe);
       if (loginSuccess) {
         _navigateToHomePage(role);
       } else {
-        _showMessage('Login Failed. Please check your credentials.');
+        if (mounted) {
+          UIUtils.showErrorDialog(context, 'Unable to Login', 'Please check your credentials.');
+        }
       }
     } catch (e) {
-      _showMessage('Unable to Login:');
+      if (mounted) {
+        UIUtils.showErrorDialog(context, 'Unable to Login', '$e');
+      }
     }
   }
 
@@ -56,16 +60,6 @@ class LoginPageState extends State<LoginPage> {
         rememberMe = true;
       });
     }
-  }
-
-// Function to display messages using Snackbar
-  void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        duration: const Duration(seconds: 2),
-      ),
-    );
   }
 
 // Navigate to Home Page based on role
@@ -99,19 +93,21 @@ class LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final appBarHeight = AppBar().preferredSize.height; // Get AppBar height
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(K.loginPageTitle),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView( // Wrap the Column
+        child: SingleChildScrollView(
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              minHeight: MediaQuery.of(context).size.height -
-                  Scaffold.of(context).appBarMaxHeight!, // Ensure the content spans the screen
+              minHeight: screenHeight - appBarHeight, // Use calculated height
             ),
-            child: IntrinsicHeight( // Ensure children take the appropriate height
+            child: IntrinsicHeight(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -125,10 +121,12 @@ class LoginPageState extends State<LoginPage> {
                   DropdownButton<String>(
                     value: _selectedRole,
                     items: [K.roleAdmin, K.roleStaff, K.roleStudent]
-                        .map((role) => DropdownMenuItem(
-                      value: role,
-                      child: Text(role),
-                    ))
+                        .map(
+                          (role) => DropdownMenuItem(
+                        value: role,
+                        child: Text(role),
+                      ),
+                    )
                         .toList(),
                     onChanged: (value) {
                       setState(() {
@@ -194,5 +192,4 @@ class LoginPageState extends State<LoginPage> {
       ),
     );
   }
-
 }

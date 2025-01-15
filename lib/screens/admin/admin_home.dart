@@ -5,7 +5,7 @@ import 'staff_page.dart';
 import 'course_page.dart';
 import 'student_page.dart';
 import 'lesson_plan_page.dart';
-import 'payment_page.dart';
+import 'payments/payment_page.dart';
 import 'admin_home_page.dart';
 
 class AdminHomePage extends StatefulWidget {

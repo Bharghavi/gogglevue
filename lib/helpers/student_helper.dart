@@ -30,6 +30,18 @@ class StudentHelper {
     studentDocRef.delete();
   }
 
+  static Future<Map<String, Student>> fetchStudentsByIds(List<String> studentIds) async {
+    if (studentIds.isEmpty) return {};
+    final snapshot = await FirebaseFirestore.instance
+        .collection(K.studentCollection)
+        .where(FieldPath.documentId, whereIn: studentIds)
+        .get();
+
+    return {
+      for (var doc in snapshot.docs) doc.id: Student.fromFirestore(doc)
+    };
+  }
+
   static Future<Student> saveNewStudent(String name, String email, String phone, String address, DateTime dob) async{
     String adminId = await AdminHelper.getLoggedAdminUserId();
     Student newStudent = Student(

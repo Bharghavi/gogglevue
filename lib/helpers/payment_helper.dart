@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/payment.dart';
-
 import '../constants.dart';
 import 'admin_helper.dart';
 
@@ -97,6 +96,54 @@ class PaymentHelper {
 
     }
     return result;
+  }
+
+  static Future<List<Payment>> getPaymentOverdue() async{
+    String adminId = await AdminHelper.getLoggedAdminUserId();
+    List<Payment> overduePayments = [];
+    final today = DateTime.now();
+    final Map<String, Map<String, Payment>> latestPayments = {};
+
+    try {
+      final snapshot = await FirebaseFirestore.instance.collection(K.paymentCollection)
+                            .where(K.adminId, isEqualTo:adminId)
+                            .get();
+      final payments = snapshot.docs.map((doc) => Payment.fromFirestore(doc)).toList();
+       final paymentsByStudentAndBatch = <String, Map<String, List<Payment>>>{};
+
+      for (var payment in payments) {
+        paymentsByStudentAndBatch
+            .putIfAbsent(payment.studentId, () => {})
+            .putIfAbsent(payment.batchId, () => [])
+            .add(payment);
+      }
+
+      for (var studentId in paymentsByStudentAndBatch.keys) {
+        final batchMap = paymentsByStudentAndBatch[studentId]!;
+        latestPayments[studentId] = {};
+
+        for (var batchId in batchMap.keys) {
+          final batchPayments = batchMap[batchId]!;
+          batchPayments.sort((a, b) => b.validTo.compareTo(a.validTo));
+          final latestPayment = batchPayments.first;
+
+          if (latestPayment.validTo.isBefore(today)) {
+            overduePayments.add(latestPayment);
+          }
+        }
+      }
+    } catch (e) {
+      print("Error fetching payments: $e");
+    }
+
+    return overduePayments;
+  }
+
+  static Future<void> savePaymentNote(Payment payment) async {
+    var paymentDocRef = FirebaseFirestore.instance.collection(K.paymentCollection).doc(payment.id);
+    await paymentDocRef.update({
+      'note': payment.note,
+    });
   }
 
 }

@@ -93,6 +93,7 @@ class CoursePageState extends State<CoursePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Course Page'),
+        leading: const SizedBox(),
       ),
       body: isLoading ?
       Center(

@@ -83,6 +83,10 @@ class StudentBatchHelper {
         .where(K.studentId, isEqualTo: studentId)
         .get();
 
+    if (querySnapshot.docs.isEmpty) {
+      return [];
+    }
+
     List<Batch> result = await Future.wait(querySnapshot.docs.map((doc) async {
       DocumentSnapshot batchSnapshot = await FirebaseFirestore.instance
           .collection(K.batchCollection)

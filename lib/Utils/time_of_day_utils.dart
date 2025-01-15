@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class TimeOfDayUtils {
   static String timeOfDayToString(TimeOfDay time) {
@@ -8,5 +9,10 @@ class TimeOfDayUtils {
   static TimeOfDay stringToTimeOfDay(String timeString) {
     final parts = timeString.split(':');
     return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+  }
+
+  static String dateTimeToString(DateTime date) {
+    final DateFormat formatter = DateFormat('dd-MMM-yyyy');
+    return formatter.format(date);
   }
 }

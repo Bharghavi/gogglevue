@@ -16,6 +16,7 @@ class HomepageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Admin Dashboard'),
+        leading: const SizedBox(),
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications),

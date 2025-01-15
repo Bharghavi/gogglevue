@@ -9,6 +9,7 @@ class Payment {
   DateTime paymentDate;
   DateTime validFrom;
   DateTime validTo;
+  String? note;
 
   Payment({
     this.id,
@@ -19,6 +20,7 @@ class Payment {
     required this.paymentDate,
     required this.validFrom,
     required this.validTo,
+    this.note,
 });
 
   Map<String, dynamic> toMap() {
@@ -30,6 +32,7 @@ class Payment {
       'paymentDate': Timestamp.fromDate(paymentDate),
       'validFrom': Timestamp.fromDate(validFrom),
       'validTo': Timestamp.fromDate(validTo),
+      'note':note,
     };
   }
 
@@ -44,6 +47,8 @@ class Payment {
         batchId: map['batchId'] ?? '',
         paymentDate: (map['paymentDate'] as Timestamp).toDate(),
         validFrom: (map['validFrom'] as Timestamp).toDate(),
-        validTo: (map['validTo'] as Timestamp).toDate());
+        validTo: (map['validTo'] as Timestamp).toDate(),
+        note: map['note'] ?? '',
+    );
   }
 }
