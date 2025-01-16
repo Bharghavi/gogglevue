@@ -12,7 +12,8 @@ class TimeOfDayUtils {
   }
 
   static String dateTimeToString(DateTime date) {
+    final DateTime onlyDate = DateTime(date.year, date.month, date.day);
     final DateFormat formatter = DateFormat('dd-MMM-yyyy');
-    return formatter.format(date);
+    return formatter.format(onlyDate);
   }
 }

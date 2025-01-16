@@ -13,28 +13,31 @@ class UpcomingSessionsSection extends StatefulWidget {
 }
 
 class UpcomingSessionsSectionState extends State<UpcomingSessionsSection> {
-  List<Batch> sessions = [];
+  List<Batch> today = [];
+  List<Batch> tomorrow = [];
   bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    fetchSessionsForToday();
+    fetchUpcomingSessions();
   }
 
-  Future<void> fetchSessionsForToday() async {
+  Future<void> fetchUpcomingSessions() async {
     setState(() {
       isLoading = true;
     });
-
     try {
-      final batchForToday = await UpcomingSessionsHelper.getBatchesForToday();
+      final upcomingBatches = await UpcomingSessionsHelper.getUpcomingBatches();
       setState(() {
-        sessions = batchForToday;
+        today = upcomingBatches[0]!;
+        tomorrow = upcomingBatches[1]!;
       });
+
     } catch (e) {
       setState(() {
-        sessions = []; // Reset sessions in case of an error
+        today = [];
+        tomorrow = [];
       });
     } finally {
       setState(() {
@@ -49,41 +52,81 @@ class UpcomingSessionsSectionState extends State<UpcomingSessionsSection> {
     return Card(
       child: isLoading
           ? Center(child: CircularProgressIndicator())
-          : sessions.isEmpty
+          : today.isEmpty && tomorrow.isEmpty
           ? Padding(
         padding: const EdgeInsets.all(16.0),
         child: Text(
-          'No sessions scheduled for today.',
+          'No sessions scheduled for today and tomorrow.',
           style: TextStyle(color: Colors.grey),
         ),
       )
-          : ListView.builder(
+          : ListView(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        itemCount: sessions.length,
-        itemBuilder: (context, index) {
-          final session = sessions[index];
-          return ListTile(
-            leading: const Icon(Icons.schedule),
-            title: Text(session.name),
-            subtitle: Text(
-              'Today at ${TimeOfDayUtils.timeOfDayToString(session.startTime)}',
+        children: [
+          // Display today's sessions
+          if (today.isNotEmpty) ...[
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                'Today',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
             ),
-            trailing: TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => StudentBatchPage(batch: session),
-                  ),
-                );
-              },
-              child: const Text('View Details'),
+            ...today.map((session) => ListTile(
+              leading: const Icon(Icons.schedule),
+              title: Text(session.name),
+              subtitle: Text(
+                'Today at ${TimeOfDayUtils.timeOfDayToString(session.startTime)}',
+              ),
+              trailing: TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          StudentBatchPage(batch: session),
+                    ),
+                  );
+                },
+                child: const Text('View Details'),
+              ),
+            )),
+          ],
+
+          // Display tomorrow's sessions
+          if (tomorrow.isNotEmpty) ...[
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                'Tomorrow',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
             ),
-          );
-        },
+            ...tomorrow.map((session) => ListTile(
+              leading: const Icon(Icons.schedule),
+              title: Text(session.name),
+              subtitle: Text(
+                'Tomorrow at ${TimeOfDayUtils.timeOfDayToString(session.startTime)}',
+              ),
+              trailing: TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          StudentBatchPage(batch: session),
+                    ),
+                  );
+                },
+                child: const Text('View Details'),
+              ),
+            )),
+          ],
+        ],
       ),
     );
   }
+
 
 }

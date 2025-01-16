@@ -96,4 +96,9 @@ class LoginManager {
       return false;
     }
   }
+
+  static Future<void> resetPassword(String email) async{
+    await FirebaseAuth.instance
+        .sendPasswordResetEmail(email: email);
+  }
 }

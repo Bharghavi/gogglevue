@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gogglevue/Utils/time_of_day_utils.dart';
 import '../../helpers/lesson_plan_helper.dart';
 import '../../helpers/student_batch_helper.dart';
 
@@ -138,7 +139,7 @@ class LessonPlanPageState extends State<LessonPlanPage> {
                     }
                   },
                   child: Text(
-                    '${_selectedDate.toLocal()}'.split(' ')[0],
+                    TimeOfDayUtils.dateTimeToString(_selectedDate),
                     style: TextStyle(fontSize: 16),
                   ),
                 ),

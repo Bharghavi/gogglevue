@@ -1,58 +1,42 @@
-import 'package:gogglevue/helpers/batch_helper.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import '../constants.dart';
 import '../models/batch.dart';
 
 class UpcomingSessionsHelper {
 
-  static Future<List<Map<String, dynamic>>>  buildUpcomingSessions() async {
+  static Future<Map<int,List<Batch>>> getUpcomingBatches() async {
 
-    List<Batch> batches = await BatchHelper.fetchActiveBatches();
+    Map<int,List<Batch>> result = {};
 
-    print('${batches.length} batches fetched');
+    List<Batch> today = await _getBatchesForDay(0);
+    List<Batch> tomorrow = await _getBatchesForDay(1);
 
-    Map<String, int> dayToIndex = {
-      "Sun": 0,
-      "Mon": 1,
-      "Tue": 2,
-      "Wed": 3,
-      "Thu": 4,
-      "Fri": 5,
-      "Sat": 6,
-    };
-
-    // Get today's day and index
-    String today = DateFormat('E').format(DateTime.now()); // e.g., "Mon"
-    int todayIndex = dayToIndex[today]!;
-
-    // Process batches
-    List<Map<String, dynamic>> upcomingSessions = [];
-    for (var batch in batches) {
-      // Filter and sort scheduleDays
-      List<String> upcomingDays = batch.scheduleDays
-          .where((day) => dayToIndex[day]! >= todayIndex)
-          .toList()
-        ..sort((a, b) => dayToIndex[a]!.compareTo(dayToIndex[b]!));
-
-      if (upcomingDays.isNotEmpty) {
-        upcomingSessions.add({
-          "batchName": batch.name,
-          "upcomingDays": upcomingDays,
-        });
-      }
-    }
-
-    return upcomingSessions;
-  }
-
-  static Future<List<Batch>> getBatchesForToday() async {
-    List<Batch> batches = await BatchHelper.fetchActiveBatches();
-    String today = DateFormat('E').format(DateTime.now());
-
-    List<Batch> result = batches.where((batch) {
-      return batch.scheduleDays.contains(today);
-    }).toList();
+    result[0] = today;
+    result[1] = tomorrow;
 
     return result;
   }
 
+  static Future<List<Batch>> _getBatchesForDay(int dayOffset) async {
+    DateTime targetDate = DateTime.now().add(Duration(days: dayOffset));
+    String targetDay = DateFormat('E').format(targetDate);
+
+    String? now = (dayOffset == 0)
+        ? DateFormat('HH:mm').format(DateTime.now())
+        : null;
+
+    Query query = FirebaseFirestore.instance
+        .collection(K.batchCollection)
+        .where(K.scheduleDays, arrayContains: targetDay);
+
+    if (now != null) {
+      query = query.where('startTime', isGreaterThan: now);
+    }
+
+    query = query.orderBy('startTime');
+
+    QuerySnapshot querySnapshot = await query.get();
+    return querySnapshot.docs.map((doc) => Batch.fromFirestore(doc)).toList();
+  }
 }

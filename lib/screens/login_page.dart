@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:gogglevue/Utils/ui_utils.dart';
-import 'admin_home.dart';
-import '../staff/staff_home.dart';
-import '../student/student_home.dart';
-import '../../managers/login_manager.dart';
-import '../../constants.dart';
-import 'registration_page.dart';
+import 'admin/admin_home.dart';
+import 'staff/staff_home.dart';
+import 'student/student_home.dart';
+import '../managers/login_manager.dart';
+import '../constants.dart';
+import 'admin/registration_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -62,7 +62,6 @@ class LoginPageState extends State<LoginPage> {
     }
   }
 
-// Navigate to Home Page based on role
   void _navigateToHomePage(String role) {
     if (role == 'Admin') {
       Navigator.push(
@@ -93,7 +92,7 @@ class LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final appBarHeight = AppBar().preferredSize.height; // Get AppBar height
+    final appBarHeight = AppBar().preferredSize.height;
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
@@ -105,7 +104,7 @@ class LoginPageState extends State<LoginPage> {
         child: SingleChildScrollView(
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              minHeight: screenHeight - appBarHeight, // Use calculated height
+              minHeight: screenHeight - appBarHeight,
             ),
             child: IntrinsicHeight(
               child: Column(
@@ -166,6 +165,11 @@ class LoginPageState extends State<LoginPage> {
                         },
                       ),
                       const Text("Remember Me"),
+                      const Spacer(),
+                      TextButton(
+                        onPressed: _forgotPassword,
+                        child: const Text("Forgot Password?"),
+                      ),
                     ],
                   ),
                   if (_selectedRole == K.roleAdmin) ...[
@@ -192,4 +196,63 @@ class LoginPageState extends State<LoginPage> {
       ),
     );
   }
+
+  void _forgotPassword() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        String email = "";
+
+        return AlertDialog(
+          title: const Text("Reset Password"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text("Please enter your email address to receive a password reset link."),
+              const SizedBox(height: 16.0),
+              TextField(
+                onChanged: (value) {
+                  email = value;
+                },
+                decoration: const InputDecoration(
+                  labelText: "Email Address",
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.emailAddress,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (email.isNotEmpty) {
+                  try {
+                    await LoginManager.resetPassword(email);
+                    if (mounted) {
+                      Navigator.of(context).pop();
+                      UIUtils.showMessage(context, 'A reset link has been sent to $email.');
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      UIUtils.showErrorDialog(context, 'Failed to send reset link. Please try again.', '$e');
+                    }
+                  }
+                } else {
+                  UIUtils.showMessage(context, 'Please enter a valid email address.');
+                }
+              },
+              child: const Text("Send"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 }

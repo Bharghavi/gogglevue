@@ -42,4 +42,6 @@ class K {
   static const String date = 'date';
   static const String lessons = 'lessons';
   static const String paymentDate = 'paymentDate';
+  static const String scheduleDays = 'scheduleDays';
+  static const String startTime = 'startTime';
 }

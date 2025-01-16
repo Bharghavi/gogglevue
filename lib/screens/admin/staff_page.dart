@@ -174,6 +174,7 @@ class StaffPageState extends State<StaffPage> {
     }
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(

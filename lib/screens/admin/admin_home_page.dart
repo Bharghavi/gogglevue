@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gogglevue/helpers/admin_helper.dart';
 import 'sections/upcoming_sessions.dart';
 import 'sections/pending_payments.dart';
 import 'sections/follow_up_enquiries.dart';
@@ -11,11 +12,31 @@ class HomePage extends StatefulWidget {
 }
 class HomepageState extends State<HomePage> {
 
+  String adminName = '';
+
+  @override
+  void initState() {
+    super.initState();
+    getAdminName();
+  }
+
+  Future<void> getAdminName() async {
+    String name = await AdminHelper.getLoggedInAdminName();
+
+    setState(() {
+      adminName = name;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Admin Dashboard'),
+        automaticallyImplyLeading: false,
+        title: Align(
+                  alignment: Alignment.centerLeft, // Align title to the left
+                  child: Text('Welcome $adminName'),
+                ),
         leading: const SizedBox(),
         actions: [
           IconButton(
