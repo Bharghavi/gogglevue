@@ -32,7 +32,6 @@ class Batch {
     required this.address,
   });
 
-  // Method to convert Batch to a Map for database storage (e.g., Firebase)
   Map<String, dynamic> toMap() {
     return {
       'adminId': adminId,

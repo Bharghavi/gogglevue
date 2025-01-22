@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gogglevue/helpers/admin_helper.dart';
+import '../../screens/settings_page.dart';
+import '../../helpers/admin_helper.dart';
 import 'sections/upcoming_sessions.dart';
 import 'sections/pending_payments.dart';
 import 'sections/follow_up_enquiries.dart';
@@ -34,7 +35,7 @@ class HomepageState extends State<HomePage> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Align(
-                  alignment: Alignment.centerLeft, // Align title to the left
+                  alignment: Alignment.centerLeft,
                   child: Text('Welcome $adminName'),
                 ),
         leading: const SizedBox(),
@@ -45,7 +46,12 @@ class HomepageState extends State<HomePage> {
           ),
           IconButton(
             icon: const Icon(Icons.settings),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SettingsPage()),
+              );
+            },
           ),
         ],
       ),
@@ -53,13 +59,13 @@ class HomepageState extends State<HomePage> {
         padding: const EdgeInsets.all(16.0),
         children: [
           _buildSectionHeader('Upcoming Sessions'),
-          const UpcomingSessionsSection(), // Replace with Placeholder
+          const UpcomingSessionsSection(),
           const SizedBox(height: 16.0),
           _buildSectionHeader('Pending Payments'),
-          const PendingPaymentsSection(), // Replace with Placeholder
+          const PendingPaymentsSection(),
           const SizedBox(height: 16.0),
           _buildSectionHeader('Follow-up Enquiries'),
-          const FollowUpEnquirySection(), // Replace with Placeholder
+          const FollowUpEnquirySection(),
         ],
       ),
     );
@@ -70,11 +76,8 @@ class HomepageState extends State<HomePage> {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Text(
         title,
-        style: const TextStyle(
-          fontSize: 18.0,
-          fontWeight: FontWeight.bold,
+        style: Theme.of(context).textTheme.bodyMedium,
         ),
-      ),
-    );
+      );
   }
 }

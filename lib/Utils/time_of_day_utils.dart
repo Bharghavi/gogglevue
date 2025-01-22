@@ -16,4 +16,8 @@ class TimeOfDayUtils {
     final DateFormat formatter = DateFormat('dd-MMM-yyyy');
     return formatter.format(onlyDate);
   }
+
+  static DateTime normalizeDate(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
+  }
 }

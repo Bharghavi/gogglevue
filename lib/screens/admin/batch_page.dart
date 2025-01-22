@@ -61,7 +61,7 @@ class BatchPageState extends State<BatchPage> {
             padding: const EdgeInsets.all(16.0),
             child: Text(
               'Batches',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
           ),
           // Content
@@ -91,11 +91,11 @@ class BatchPageState extends State<BatchPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                          icon: Icon(Icons.edit),
+                          icon: Icon(Icons.edit, color: Colors.blue,),
                           onPressed: () => _editBatch(context, batch),
                         ),
                         IconButton(
-                          icon: Icon(Icons.delete),
+                          icon: Icon(Icons.delete, color: Colors.red,),
                           onPressed: () => _deleteBatch(index),
                         ),
                       ],

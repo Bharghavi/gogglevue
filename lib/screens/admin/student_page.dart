@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gogglevue/Utils/time_of_day_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../models/student.dart';
 import '../../helpers/student_helper.dart';
@@ -192,44 +193,48 @@ class StudentPageState extends State<StudentPage> {
                 final student = students[index];
                 return Card(
                   margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  child: ListTile(
-                    title: Text(student.name),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Email: ${student.email}'),
-                        Text('Phone: ${student.phone}'),
-                        Text('Address: ${student.address}'),
-                        Text('DOB: ${student.dob.toLocal().toString().split(' ')[0]}'),
-                      ],
-                    ),
-                    isThreeLine: true,
-                    leading: Icon(Icons.person),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.call, color: Colors.green),
-                          onPressed: () => _makeCall(student.phone),
+                  child: Column(
+                    children: [
+                      ListTile(
+                        title: Text(student.name),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Email: ${student.email}'),
+                            Text('Phone: ${student.phone}'),
+                            Text('Address: ${student.address}'),
+                            Text('DOB: ${TimeOfDayUtils.dateTimeToString(student.dob)}'),
+                          ],
                         ),
-                        IconButton(
-                          icon: Icon(color: Colors.blue, Icons.message_rounded),
-                          onPressed: () => _sendMessage(student.phone),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.edit, color: Colors.blue),
-                          onPressed: () {
-                            showEditStudentDialog(student, index);
-                          },
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.delete, color: Colors.red),
-                          onPressed: () {
-                            deleteStudent(index);
-                          },
-                        ),
-                      ],
-                    ),
+                        isThreeLine: true,
+                        leading: Icon(Icons.person),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.call, color: Colors.green),
+                            onPressed: () => _makeCall(student.phone),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.message_rounded, color: Colors.blue),
+                            onPressed: () => _sendMessage(student.phone),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () {
+                              showEditStudentDialog(student, index);
+                            },
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.delete, color: Colors.red),
+                            onPressed: () {
+                              deleteStudent(index);
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 );
               },

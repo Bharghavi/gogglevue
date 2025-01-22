@@ -1,11 +1,16 @@
+import 'package:flutter/cupertino.dart';
+import '../Utils/ui_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ContactUtils {
 
-  static void makeCall(String phoneNumber) async {
+  static void makeCall(String phoneNumber, BuildContext context) async {
     final uri = Uri(scheme: 'tel', path: phoneNumber);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
+    } else {
+        UIUtils.showErrorDialog(
+            context, 'Error', 'Unable to make call. Try again later');
     }
   }
 

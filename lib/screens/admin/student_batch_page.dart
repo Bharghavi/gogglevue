@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gogglevue/Utils/time_of_day_utils.dart';
+import '../../Utils/time_of_day_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../Utils/ui_utils.dart';
 import '../../models/batch.dart';
@@ -230,9 +230,10 @@ class StudentBatchPageState extends State<StudentBatchPage> {
                           ),
                         ),
                         SizedBox(height: 8),
-                        Text('Location: ${widget.batch.address}'),
-                        Text('Days: ${widget.batch.scheduleDays.join(", ")}'),
-                        Text('Time: ${TimeOfDayUtils.timeOfDayToString(widget.batch.startTime)} - ${TimeOfDayUtils.timeOfDayToString(widget.batch.endTime)}'),
+                        Text('Location: ${widget.batch.address}', style: Theme.of(context).textTheme.bodySmall,),
+                        Text('Days: ${widget.batch.scheduleDays.join(", ")}', style: Theme.of(context).textTheme.bodySmall,),
+                        Text('Time: ${TimeOfDayUtils.timeOfDayToString(widget.batch.startTime)} - ${TimeOfDayUtils.timeOfDayToString(widget.batch.endTime)}',
+                          style: Theme.of(context).textTheme.bodySmall,),
                       ],
                     ),
                   ),

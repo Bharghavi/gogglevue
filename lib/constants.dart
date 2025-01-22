@@ -31,12 +31,14 @@ class K {
   static const String studentBatchCollection = 'StudentBatch';
   static const String lessonPlanCollection = 'LessonPlan';
   static const String paymentCollection = 'Payment';
+  static const String attendanceCollection = 'Attendance';
 
   static const String email = 'email';
   static const String adminId = 'adminId';
   static const String active = 'active';
   static const String batchId = 'batchId';
   static const String studentId = 'studentId';
+  static const String userId = 'userId';
   static const String courseId = 'courseId';
   static const String studentCount = 'studentCount';
   static const String date = 'date';
@@ -44,4 +46,5 @@ class K {
   static const String paymentDate = 'paymentDate';
   static const String scheduleDays = 'scheduleDays';
   static const String startTime = 'startTime';
+  static const String isPresent = 'isPresent';
 }

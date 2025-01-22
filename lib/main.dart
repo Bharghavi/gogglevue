@@ -1,12 +1,14 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import '../screens/themes/theme.dart';
+import '../screens/themes/theme_provider.dart';
+import 'package:provider/provider.dart';
 import '../managers/login_manager.dart';
 import 'screens/admin/admin_home.dart';
 import 'screens/login_page.dart';
 import 'screens/staff/staff_home.dart';
 import 'screens/student/student_home.dart';
 import 'firebase_options.dart';
-import 'constants.dart';
 import 'screens/admin/registration_page.dart';
 
 void main() async {
@@ -21,7 +23,15 @@ void main() async {
 
 Future<String> determineInitialRoute() async {
 
-  if (await LoginManager.loginWithSavedCredentials()) {
+  bool login = false;
+
+  try {
+    login = await LoginManager.loginWithSavedCredentials();
+  } catch (e) {
+    return '/login';
+  }
+
+  if (login) {
     final savedRole = await LoginManager.getSavedRole();
     if (savedRole != null) {
       switch (savedRole) {
@@ -47,19 +57,26 @@ class GoggleVue extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: K.appTitle,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return ChangeNotifierProvider(
+      create: (_) => ThemeProvider(),
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
+            title: 'Your App Title',
+            theme: lightTheme,
+            darkTheme: darkTheme,
+            themeMode: themeProvider.themeMode,
+            routes: {
+              '/login': (context) => LoginPage(),
+              '/register': (context) => RegistrationPage(),
+              '/adminHome': (context) => AdminHomePage(),
+              '/staffHome': (context) => StaffHomePage(),
+              '/studentHome': (context) => StudentHomePage(),
+            },
+            initialRoute: initialRoute,
+          );
+        },
       ),
-      routes: {
-        '/login': (context) => LoginPage(),
-        '/register': (context) => RegistrationPage(),
-        '/adminHome': (context) => AdminHomePage(),
-        '/staffHome': (context) => StaffHomePage(),
-        '/studentHome': (context) => StudentHomePage(),
-      },
-      initialRoute: initialRoute,
     );
   }
 }

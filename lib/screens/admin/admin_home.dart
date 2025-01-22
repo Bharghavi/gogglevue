@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../managers/login_manager.dart';
+import 'attendance/attendance_page.dart';
 import 'batch_page.dart';
 import 'staff_page.dart';
 import 'course_page.dart';
@@ -69,75 +70,62 @@ class AdminHomepageState extends State<AdminHomePage> {
           children: [
             DrawerHeader(
               decoration: BoxDecoration(
-                color: Colors.blueGrey,
+                color: Colors.indigo,
               ),
               child: Text(
                 'Menu',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
+                style: Theme.of(context).appBarTheme.titleTextStyle
               ),
             ),
             ListTile(
               leading: Icon(Icons.home),
-              title: Text('Home'),
+              title: Text('Home', style: Theme.of(context).textTheme.bodyMedium,),
               onTap: () => _onDrawerItemTapped(0),
             ),
             ListTile(
               leading: Icon(Icons.batch_prediction),
-              title: Text('Batch'),
+              title: Text('Batch', style: Theme.of(context).textTheme.bodyMedium,),
               onTap: () => _onDrawerItemTapped(1),
             ),
             ListTile(
               leading: Icon(Icons.group),
-              title: Text('Student'),
+              title: Text('Student', style: Theme.of(context).textTheme.bodyMedium,),
               onTap: () => _onDrawerItemTapped(2),
             ),
             ListTile(
               leading: Icon(Icons.menu_book_rounded),
-              title: Text('Lesson Plan'),
+              title: Text('Lesson Plan', style: Theme.of(context).textTheme.bodyMedium,),
               onTap: () => _onDrawerItemTapped(3),
             ),
             ListTile(
-              leading: Icon(Icons.supervisor_account),
-              title: Text('Staff'),
+              leading: Icon(Icons.supervisor_account,),
+              title: Text('Staff', style: Theme.of(context).textTheme.bodyMedium,),
               onTap: () => _onDrawerItemTapped(4),
             ),
             ListTile(
-              leading: Icon(Icons.access_time),
-              title: Text('Attendance'),
+              leading: Icon(Icons.calendar_month),
+              title: Text('Attendance', style: Theme.of(context).textTheme.bodyMedium,),
               onTap: () => _onDrawerItemTapped(5),
             ),
             ListTile(
               leading: Icon(Icons.menu_book_rounded),
-              title: Text('Courses'),
+              title: Text('Courses', style: Theme.of(context).textTheme.bodyMedium,),
               onTap: () => _onDrawerItemTapped(6),
             ),
             ListTile(
               leading: Icon(Icons.payment),
-              title: Text('Payment'),
+              title: Text('Payment', style: Theme.of(context).textTheme.bodyMedium,),
               onTap: () => _onDrawerItemTapped(7),
             ),
             ListTile(
               leading: Icon(Icons.question_answer),
-              title: Text('Enquiry'),
+              title: Text('Enquiry', style: Theme.of(context).textTheme.bodyMedium,),
               onTap: () => _onDrawerItemTapped(8),
             ),
           ],
         ),
       ),
     );
-  }
-}
-
-// AttendancePage.dart
-class AttendancePage extends StatelessWidget {
-  const AttendancePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(child: Text('Attendance Page'));
   }
 }
 

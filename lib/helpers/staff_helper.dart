@@ -36,4 +36,34 @@ class StaffHelper {
     final staffDocRef = FirebaseFirestore.instance.collection(K.staffCollection).doc(staff.id);
     staffDocRef.delete();
   }
+
+  static Future<Staff?> getStaffForBatch(String batchId) async {
+    try {
+      final batchDoc = await FirebaseFirestore.instance
+          .collection(K.batchCollection)
+          .doc(batchId)
+          .get();
+
+      if (!batchDoc.exists || !batchDoc.data()!.containsKey('instructor')) {
+        print('Batch not found or instructor not specified');
+        return null;
+      }
+
+      final instructorId = batchDoc['instructor'];
+
+      final staffDoc = await FirebaseFirestore.instance
+          .collection(K.staffCollection)
+          .doc(instructorId)
+          .get();
+
+      if (staffDoc.exists) {
+        return Staff.fromFirestore(staffDoc.data()!, staffDoc.id);
+      } else {
+        print('Instructor not found');
+      }
+    } catch (e) {
+      print('Error fetching staff for batch: $e');
+    }
+    return null;
+  }
 }

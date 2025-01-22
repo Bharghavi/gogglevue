@@ -66,18 +66,12 @@ class UpcomingSessionsSectionState extends State<UpcomingSessionsSection> {
         children: [
           // Display today's sessions
           if (today.isNotEmpty) ...[
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                'Today',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-            ),
             ...today.map((session) => ListTile(
-              leading: const Icon(Icons.schedule),
-              title: Text(session.name),
+              leading: const Icon(Icons.schedule, color: Colors.blue,),
+              title: Text(session.name, style: Theme.of(context).textTheme.bodyMedium,),
               subtitle: Text(
                 'Today at ${TimeOfDayUtils.timeOfDayToString(session.startTime)}',
+                style: Theme.of(context).textTheme.bodySmall,
               ),
               trailing: TextButton(
                 onPressed: () {
@@ -95,14 +89,7 @@ class UpcomingSessionsSectionState extends State<UpcomingSessionsSection> {
           ],
 
           // Display tomorrow's sessions
-          if (tomorrow.isNotEmpty) ...[
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                'Tomorrow',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-            ),
+          if (today.isEmpty && tomorrow.isNotEmpty) ...[
             ...tomorrow.map((session) => ListTile(
               leading: const Icon(Icons.schedule),
               title: Text(session.name),

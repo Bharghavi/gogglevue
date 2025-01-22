@@ -1,16 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:gogglevue/Utils/time_of_day_utils.dart';
 
 import '../constants.dart';
 import '../models/lesson_plan.dart';
 
 class LessonPlanHelper {
 
-  static DateTime _normalizeDate(DateTime date) {
-    return DateTime(date.year, date.month, date.day);
-  }
-
   static Future<LessonPlan?> fetchLessonPlanFor(String studentId, DateTime date) async {
-      final normalizedDate = _normalizeDate(date);
+      final normalizedDate = TimeOfDayUtils.normalizeDate(date);
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection(K.lessonPlanCollection)
           .where(K.studentId, isEqualTo: studentId)
@@ -25,7 +22,7 @@ class LessonPlanHelper {
   }
 
   static Future<void> saveLessonPlan(String studentId, DateTime date, List<String> lessons) async {
-    final normalizedDate = _normalizeDate(date);
+    final normalizedDate = TimeOfDayUtils.normalizeDate(date);
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection(K.lessonPlanCollection)
         .where(K.studentId, isEqualTo: studentId)
