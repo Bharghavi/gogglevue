@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:gogglevue/Utils/time_of_day_utils.dart';
 import '../helpers/admin_helper.dart';
 import '../helpers/batch_helper.dart';
 import '../models/batch.dart';
@@ -29,11 +30,40 @@ class StudentBatchHelper {
     return students;
   }
 
+  static Future<List<Student>> fetchAllStudentsOn(String batchId, DateTime onDate) async {
+    final adminId = await AdminHelper.getLoggedAdminUserId();
+
+    DateTime normalizedDate = TimeOfDayUtils.normalizeDate(onDate);
+
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection(K.studentBatchCollection)
+        .where(K.active, isEqualTo: true)
+        .where(K.adminId, isEqualTo: adminId)
+        .where(K.joiningDate, isLessThanOrEqualTo: normalizedDate)
+        .where(K.batchId, isEqualTo: batchId)
+        .get();
+
+    List<Student> students = await Future.wait(querySnapshot.docs.map((doc) async {
+      DocumentSnapshot studentSnapshot = await FirebaseFirestore.instance
+          .collection(K.studentCollection)
+          .doc(doc[K.studentId])
+          .get();
+      return Student.fromFirestore(studentSnapshot);
+    }).toList());
+
+    return students;
+  }
+
   static Future<List<Student>> fetchAllStudentsNotInBatch(String batchId) async {
 
     final adminId = await AdminHelper.getLoggedAdminUserId();
 
     List<Student> studentsInBatch = await fetchAllStudentsFor(batchId);
+
+    if (studentsInBatch.isEmpty) {
+      return [];
+    }
+
     List<String> studentIdsInBatch = studentsInBatch.map((student) => student.id!).toList();
 
     Query query = FirebaseFirestore.instance.collection(K.studentCollection)

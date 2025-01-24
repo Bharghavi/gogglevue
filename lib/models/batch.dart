@@ -5,16 +5,16 @@ import '../Utils/time_of_day_utils.dart';
 class Batch {
   final String? id;
   final String adminId;
-  final String name;
+  String name;
   int studentCount;
   final String courseId;
-  final bool active;
-  final String instructor;
-  final String notes;
-  final List<String> scheduleDays;
-  final TimeOfDay startTime;
-  final TimeOfDay endTime;
-  final String address;
+  bool active;
+  String instructor;
+  String notes;
+  List<String> scheduleDays;
+  TimeOfDay startTime;
+  TimeOfDay endTime;
+  String address;
 
 
   Batch({

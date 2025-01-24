@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../helpers/upcoming_sessions_helper.dart';
 import '../../../Utils/time_of_day_utils.dart';
 import '../../../models/batch.dart';
-import '../student_batch_page.dart';
+import '../batch/student_batch_page.dart';
 
 class UpcomingSessionsSection extends StatefulWidget {
   const UpcomingSessionsSection({super.key});
@@ -35,6 +35,7 @@ class UpcomingSessionsSectionState extends State<UpcomingSessionsSection> {
       });
 
     } catch (e) {
+      print(e);
       setState(() {
         today = [];
         tomorrow = [];
@@ -67,47 +68,42 @@ class UpcomingSessionsSectionState extends State<UpcomingSessionsSection> {
           // Display today's sessions
           if (today.isNotEmpty) ...[
             ...today.map((session) => ListTile(
-              leading: const Icon(Icons.schedule, color: Colors.blue,),
-              title: Text(session.name, style: Theme.of(context).textTheme.bodyMedium,),
+              leading: const Icon(Icons.schedule, color: Colors.blue),
+              title: Text(
+                session.name,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
               subtitle: Text(
                 'Today at ${TimeOfDayUtils.timeOfDayToString(session.startTime)}',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
-              trailing: TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          StudentBatchPage(batch: session),
-                    ),
-                  );
-                },
-                child: const Text('View Details'),
-              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => StudentBatchPage(batch: session),
+                  ),
+                );
+              },
             )),
           ],
 
           // Display tomorrow's sessions
           if (today.isEmpty && tomorrow.isNotEmpty) ...[
             ...tomorrow.map((session) => ListTile(
-              leading: const Icon(Icons.schedule),
+              leading: const Icon(Icons.schedule, color: Colors.blue),
               title: Text(session.name),
               subtitle: Text(
                 'Tomorrow at ${TimeOfDayUtils.timeOfDayToString(session.startTime)}',
               ),
-              trailing: TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          StudentBatchPage(batch: session),
-                    ),
-                  );
-                },
-                child: const Text('View Details'),
-              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => StudentBatchPage(batch: session),
+                  ),
+                );
+              },
             )),
           ],
         ],

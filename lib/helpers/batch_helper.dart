@@ -37,7 +37,7 @@ class BatchHelper {
     batchDocRef.delete();
   }
 
-  static Future<Batch> saveBatch(String name, bool active, String instructor, String courseId, String notes, List<String> scheduleDays, TimeOfDay startTime, TimeOfDay endTime, String address) async{
+  static Future<Batch> createNewBatch(String name, bool active, String instructor, String courseId, String notes, List<String> scheduleDays, TimeOfDay startTime, TimeOfDay endTime, String address) async{
     String adminId = await AdminHelper.getLoggedAdminUserId();
     Batch newBatch = Batch(
         adminId: adminId,
@@ -53,6 +53,13 @@ class BatchHelper {
         address: address);
     await FirebaseFirestore.instance.collection(K.batchCollection).add(newBatch.toMap());
     return newBatch;
+  }
+
+  static Future<void> updateBatch(Batch batch) async {
+    final batchDocRef = FirebaseFirestore.instance
+        .collection(K.batchCollection).doc(batch.id);
+
+    await batchDocRef.update(batch.toMap());
   }
 
   static Future<void> updateStudentCount(String batchId, int delta) async {

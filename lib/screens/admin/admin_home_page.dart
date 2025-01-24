@@ -58,14 +58,35 @@ class HomepageState extends State<HomePage> {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          _buildSectionHeader('Upcoming Sessions'),
-          const UpcomingSessionsSection(),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Upcoming Sessions section
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSectionHeader('Upcoming Sessions'),
+                    const UpcomingSessionsSection(),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16.0), // Spacing between the two sections
+              // Pending Payments section
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSectionHeader('Pending Payments'),
+                    const PendingPaymentsSection(),
+                  ],
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 16.0),
-          _buildSectionHeader('Pending Payments'),
-          const PendingPaymentsSection(),
-          const SizedBox(height: 16.0),
-          _buildSectionHeader('Follow-up Enquiries'),
-          const FollowUpEnquirySection(),
+          //_buildSectionHeader('Follow-up Enquiries'),
+          //const FollowUpEnquirySection(),
         ],
       ),
     );

@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import '../../../helpers/staff_helper.dart';
-import '../../../helpers/attendance_helper.dart';
-import '../../../Utils/date_selector.dart';
-import '../../../Utils/time_of_day_utils.dart';
-import '../../../Utils/ui_utils.dart';
-import '../../../helpers/student_batch_helper.dart';
-import '../../../models/attendance.dart';
-import '../../../models/batch.dart';
-import '../../../models/staff.dart';
-import '../../../models/student.dart';
+import 'package:gogglevue/screens/admin/batch/batch_details_card.dart';
+import '../../helpers/staff_helper.dart';
+import '../../helpers/attendance_helper.dart';
+import '../../Utils/date_selector.dart';
+import '../../Utils/time_of_day_utils.dart';
+import '../../Utils/ui_utils.dart';
+import '../../helpers/student_batch_helper.dart';
+import '../../models/attendance.dart';
+import '../../models/batch.dart';
+import '../../models/staff.dart';
+import '../../models/student.dart';
 
 class StudentAttendancePage extends StatefulWidget {
   final Batch batch;
@@ -31,28 +32,31 @@ class StudentAttendancePageState extends State<StudentAttendancePage> {
   bool _isSessionCancelled = false;
   String? _cancellationReason;
   Batch? batch;
+  String staffName = '';
 
   @override
   void initState() {
     super.initState();
     batch = widget.batch;
     fetchAndSetAttendance(selectedDate);
-    fetchStudentsForBatch();
+    fetchStudentsForBatch(selectedDate);
   }
 
-  Future<void> fetchStudentsForBatch() async {
+  Future<void> fetchStudentsForBatch(DateTime date) async {
     try {
       setState(() {
         isLoading = true;
       });
       final studentList =
-          await StudentBatchHelper.fetchAllStudentsFor(batch!.id!);
+          await StudentBatchHelper.fetchAllStudentsOn(batch!.id!, date);
       final staff = await StaffHelper.getStaffForBatch(batch!.id!);
       final List<Staff> list = await StaffHelper.getAllStaff();
       setState(() {
+        studentsInBatch = [];
         studentsInBatch.addAll(studentList);
         _selectedStaffId = staff?.id;
         _staffList = list;
+        staffName = staff!.name;
         isLoading = false;
       });
     } catch (e) {
@@ -90,7 +94,7 @@ class StudentAttendancePageState extends State<StudentAttendancePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Students in ${batch!.name}'),
+        title: Text('Attendance for ${batch!.name}'),
       ),
       body: isLoading
           ? Center(
@@ -101,42 +105,7 @@ class StudentAttendancePageState extends State<StudentAttendancePage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Batch details section
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Card(
-                        elevation: 4,
-                        margin: EdgeInsets.all(8),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Batch Details',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                ),
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                'Location: ${batch!.address}',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                              Text(
-                                'Days: ${batch!.scheduleDays.join(", ")}',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                              Text(
-                                'Time: ${TimeOfDayUtils.timeOfDayToString(batch!.startTime)} - ${TimeOfDayUtils.timeOfDayToString(batch!.endTime)}',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
+                   BatchDetailsCard(batch: batch!, staffName: staffName, onEdit: (){},),
 
                     // Calendar Widget Section
                     Padding(
@@ -145,6 +114,7 @@ class StudentAttendancePageState extends State<StudentAttendancePage> {
                         initialDate: selectedDate,
                         onDateChanged: (date) async {
                           fetchAndSetAttendance(date);
+                          fetchStudentsForBatch(date);
                         },
                       ),
                     ),

@@ -66,38 +66,35 @@ class PendingPaymentsSectionState extends State<PendingPaymentsSection> {
                   ),
                 )
               : ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: overdue.length,
-                  itemBuilder: (context, index) {
-                    final payment = overdue[index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 8.0, horizontal: 16.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // Grouping the icon and name close together
-                          Row(
-                            children: [
-                              const Icon(Icons.currency_rupee_rounded, color: Colors.red),
-                              const SizedBox(width: 8), // Add some spacing between the icon and name
-                              Text(
-                                studentMap[payment.studentId]!.name,
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                            ],
-                          ),
-                          // Adding some space before the "View Details" button
-                          TextButton(
-                            onPressed: () => _viewDetailsButtonPressed(payment),
-                            child: const Text('View Details'),
-                          ),
-                        ],
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: overdue.length,
+        itemBuilder: (context, index) {
+          final payment = overdue[index];
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Wrapping the Row with InkWell for tap functionality
+                InkWell(
+                  onTap: () => _viewDetailsButtonPressed(payment),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.currency_rupee_rounded, color: Colors.red),
+                      const SizedBox(width: 8), // Add some spacing between the icon and name
+                      Text(
+                        studentMap[payment.studentId]!.name,
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
-                    );
-                  },
+                    ],
+                  ),
                 ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 

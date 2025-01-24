@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gogglevue/Utils/time_of_day_utils.dart';
-import 'package:intl/intl.dart';
+import '/Utils/time_of_day_utils.dart';
 
 class DateSelector extends StatefulWidget {
   final DateTime initialDate;
@@ -36,15 +35,16 @@ class DateSelectorState extends State<DateSelector> {
       setState(() {
         selectedDate = pickedDate;
       });
-      widget.onDateChanged(selectedDate);
+      widget.onDateChanged(pickedDate);
     }
   }
 
   void _changeDate(int days) {
+    final updatedDate = selectedDate.add(Duration(days: days));
     setState(() {
-      selectedDate = selectedDate.add(Duration(days: days));
+      selectedDate = updatedDate;
     });
-    widget.onDateChanged(selectedDate);
+    widget.onDateChanged(updatedDate);
   }
 
   @override

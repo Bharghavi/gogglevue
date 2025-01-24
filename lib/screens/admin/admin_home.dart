@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
+import 'batch/batch_list_page.dart';
 import '../../managers/login_manager.dart';
-import 'attendance/attendance_page.dart';
-import 'batch_page.dart';
 import 'staff_page.dart';
 import 'course_page.dart';
 import 'student_page.dart';
-import 'lesson_plan_page.dart';
 import 'payments/payment_page.dart';
 import 'admin_home_page.dart';
 
@@ -22,11 +20,11 @@ class AdminHomepageState extends State<AdminHomePage> {
   // List of pages
   final List<Widget> _pages = [
     HomePage(),
-    BatchPage(),
+    BatchListPage(destinationPage: 'batchDetails'),
     StudentPage(),
-    LessonPlanPage(),
+    BatchListPage(destinationPage: 'lessonPlan'),
     StaffPage(),
-    AttendancePage(),
+    BatchListPage(destinationPage: 'attendance'),
     CoursePage(),
     PaymentPage(),
     EnquiryPage(),

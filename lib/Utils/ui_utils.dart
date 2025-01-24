@@ -41,8 +41,8 @@ class UIUtils {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(title),
-          content: Text(content),
+          title: Text(title, style: Theme.of(context).textTheme.bodyMedium,),
+          content: Text(content,  style: Theme.of(context).textTheme.bodySmall,),
           actions: [
             TextButton(
               onPressed: () {

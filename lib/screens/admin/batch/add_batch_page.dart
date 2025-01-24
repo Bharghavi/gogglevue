@@ -1,174 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../helpers/course_helper.dart';
-import '../../helpers/staff_helper.dart';
-import '../../models/batch.dart';
-import '../../helpers/batch_helper.dart';
-import '../../Utils/ui_utils.dart';
-import '../../models/course.dart';
-import '../../models/staff.dart';
-import 'student_batch_page.dart';
 
-class BatchPage extends StatefulWidget {
-  const BatchPage({super.key});
-
-  @override
-  BatchPageState createState() => BatchPageState();
-
-}
-
-class BatchPageState extends State<BatchPage> {
-  List<Batch> batches = [];
-  bool isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    fetchBatch();
-  }
-
-  Future<void> fetchBatch() async {
-    setState(() {
-      isLoading = true;
-    });
-    try {
-      final batchList = await BatchHelper.fetchActiveBatches();
-      setState(() {
-        batches = batchList;
-        isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-      if (mounted) {
-        UIUtils.showErrorDialog(context, 'Error while fetching batch', '$e');
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body:  isLoading
-        ? Center(
-        child: CircularProgressIndicator(), // Show loading indicator
-          )
-        : Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Title
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              'Batches',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-          ),
-          // Content
-          Expanded(
-            child: batches.isEmpty
-                ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: () => _navigateToAddBatch(context),
-                    child: Text('Add Your First Batch'),
-                  ),
-                ],
-              ),
-            )
-                : ListView.builder(
-              itemCount: batches.length,
-              itemBuilder: (context, index) {
-                final batch = batches[index];
-                return Card(
-                  margin: EdgeInsets.all(8),
-                  child: ListTile(
-                    title: Text(batch.name),
-                    subtitle: Text('${batch.studentCount} students'),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.edit, color: Colors.blue,),
-                          onPressed: () => _editBatch(context, batch),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.delete, color: Colors.red,),
-                          onPressed: () => _deleteBatch(index),
-                        ),
-                      ],
-                    ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => StudentBatchPage(batch: batch),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToAddBatch(context),
-        child: Icon(Icons.add),
-      ),
-    );
-  }
-
-
-  void _navigateToAddBatch(BuildContext context) async {
-    final newBatch = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => AddBatchPage()),
-    );
-
-    if (newBatch != null) {
-      setState(() {
-        batches.add(newBatch);
-      });
-    }
-  }
-
-  void _editBatch(BuildContext context, Batch batch) {
-    // Implement edit batch logic
-  }
-
-  void _deleteBatch(int index) {
-    UIUtils.showConfirmationDialog(context: context,
-        title: 'Delete batch',
-        content: 'Are you sure you want to delete the batch ${batches[index].name}',
-        onConfirm: () {
-          if (batches[index].studentCount > 0) {
-            if (mounted) {
-              UIUtils.showErrorDialog(
-                  context, 'Delete Error',
-                  'Cannot delete batch with existing students.');
-            }
-            return;
-          }
-          BatchHelper.deleteBatch(batches[index]).then((_) {
-            setState(() {
-              batches.removeAt(index);
-            });
-            if (mounted) {
-              UIUtils.showMessage(context, 'Batch deleted successfully');
-            }
-          }).catchError((e) {
-            if (mounted) {
-              UIUtils.showErrorDialog(context, 'Error occurred', '$e');
-            }
-          });
-        }
-    );
-  }
-}
+import '../../../Utils/ui_utils.dart';
+import '../../../helpers/batch_helper.dart';
+import '../../../helpers/course_helper.dart';
+import '../../../helpers/staff_helper.dart';
+import '../../../models/course.dart';
+import '../../../models/staff.dart';
 
 class AddBatchPage extends StatefulWidget {
   const AddBatchPage({super.key});
@@ -290,7 +127,7 @@ class AddBatchPageState extends State<AddBatchPage> {
     }
 
     try {
-      final newBatch = await BatchHelper.saveBatch(
+      final newBatch = await BatchHelper.createNewBatch(
           _batchNameController.text,
           true,
           selectedInstructorId!,

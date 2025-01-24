@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import '../../Utils/time_of_day_utils.dart';
+import '../../../helpers/staff_helper.dart';
+import '../../../helpers/batch_helper.dart';
+import '/screens/admin/batch/batch_details_card.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../Utils/ui_utils.dart';
-import '../../models/batch.dart';
-import '../../models/student.dart';
-import '../../helpers/student_batch_helper.dart';
+import '../../../Utils/ui_utils.dart';
+import '../../../models/batch.dart';
+import '../../../models/student.dart';
+import '../../../helpers/student_batch_helper.dart';
+import 'edit_batch_dialog.dart';
 
 class StudentBatchPage extends StatefulWidget {
   final Batch batch;
@@ -21,6 +24,7 @@ class StudentBatchPageState extends State<StudentBatchPage> {
   Student? selectedStudent;
   DateTime? joiningDate;
   bool isLoading = false;
+  String staffName = '';
 
   @override
   void initState() {
@@ -35,10 +39,11 @@ class StudentBatchPageState extends State<StudentBatchPage> {
       });
       final studentList = await StudentBatchHelper.fetchAllStudentsFor(widget.batch.id!);
       final fetchStudentsNotInBatch = await StudentBatchHelper.fetchAllStudentsNotInBatch(widget.batch.id!);
-
+      final fetchedStaff = await StaffHelper.getStaffForBatch(widget.batch.id!);
       setState(() {
         studentsNotInBatch.addAll(fetchStudentsNotInBatch);
         studentsInBatch.addAll(studentList);
+        staffName = fetchedStaff!.name;
         isLoading = false;
       });
 
@@ -155,6 +160,16 @@ class StudentBatchPageState extends State<StudentBatchPage> {
     }
   }
 
+  void _removeBatch(Batch batch) async {
+    UIUtils.showConfirmationDialog(context: context,
+        title: 'Remove Batch',
+        content: 'Are you sure you want to delete this batch?',
+        onConfirm: () {
+          Navigator.pop(context, batch.id);
+          BatchHelper.deleteBatch(batch);
+        });
+  }
+
 
   void _removeStudent(Student student) async {
     UIUtils.showConfirmationDialog(context: context,
@@ -211,38 +226,30 @@ class StudentBatchPageState extends State<StudentBatchPage> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Batch details section
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Card(
-                  elevation: 4,
-                  margin: EdgeInsets.all(8),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Batch Details',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Text('Location: ${widget.batch.address}', style: Theme.of(context).textTheme.bodySmall,),
-                        Text('Days: ${widget.batch.scheduleDays.join(", ")}', style: Theme.of(context).textTheme.bodySmall,),
-                        Text('Time: ${TimeOfDayUtils.timeOfDayToString(widget.batch.startTime)} - ${TimeOfDayUtils.timeOfDayToString(widget.batch.endTime)}',
-                          style: Theme.of(context).textTheme.bodySmall,),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+              BatchDetailsCard(batch: widget.batch, staffName: staffName,
+                       onEdit: () => openEditDialog(context, widget.batch)),
               // Students list section
               Expanded(
                 child: studentsInBatch.isEmpty
-                    ? Center(child: Text('No students added yet.'))
+                    ?
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('No students added yet.', style: Theme.of(context).textTheme.bodyMedium),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        _removeBatch(widget.batch);
+                      },
+                      icon: const Icon(Icons.delete),
+                      label: const Text('Delete Batch'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ],
+                )
                     : ListView.builder(
                   itemCount: studentsInBatch.length,
                   itemBuilder: (context, index) {
@@ -250,8 +257,8 @@ class StudentBatchPageState extends State<StudentBatchPage> {
                     return Card(
                       margin: EdgeInsets.all(8),
                       child: ListTile(
-                        title: Text(student.name),
-                        subtitle: Text('Address: ${student.address}'),
+                        title: Text(student.name, style: Theme.of(context).textTheme.bodyMedium,),
+                        //subtitle: Text('Address: ${student.address}'),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min, // Ensures the row takes up minimal space
                           children: [
@@ -284,8 +291,21 @@ class StudentBatchPageState extends State<StudentBatchPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addStudent,
-        child: Icon(Icons.add),
+        child: Icon(Icons.add, color: Colors.white,),
       ),
     );
+  }
+
+  void openEditDialog(BuildContext context, Batch batch) async {
+    final updatedBatch = await showDialog<Batch>(
+      context: context,
+      builder: (context) => EditBatchDialog(batch: batch),
+    );
+
+    if (updatedBatch != null) {
+      setState(() {
+        batch = updatedBatch;
+      });
+    }
   }
 }

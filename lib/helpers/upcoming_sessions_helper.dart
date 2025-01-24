@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../constants.dart';
 import '../models/batch.dart';
+import 'admin_helper.dart';
 
 class UpcomingSessionsHelper {
 
@@ -19,6 +20,8 @@ class UpcomingSessionsHelper {
   }
 
   static Future<List<Batch>> _getBatchesForDay(int dayOffset) async {
+    String adminId = await AdminHelper.getLoggedAdminUserId();
+    
     DateTime targetDate = DateTime.now().add(Duration(days: dayOffset));
     String targetDay = DateFormat('E').format(targetDate);
 
@@ -28,6 +31,7 @@ class UpcomingSessionsHelper {
 
     Query query = FirebaseFirestore.instance
         .collection(K.batchCollection)
+        .where(K.adminId, isEqualTo: adminId)
         .where(K.scheduleDays, arrayContains: targetDay);
 
     if (now != null) {

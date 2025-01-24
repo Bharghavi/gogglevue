@@ -47,4 +47,5 @@ class K {
   static const String scheduleDays = 'scheduleDays';
   static const String startTime = 'startTime';
   static const String isPresent = 'isPresent';
+  static const String joiningDate = 'joiningDate';
 }
