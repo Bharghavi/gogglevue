@@ -196,14 +196,15 @@ class StudentPageState extends State<StudentPage> {
                   child: Column(
                     children: [
                       ListTile(
-                        title: Text(student.name),
+                        title: Text(student.name, style: Theme.of(context).textTheme.bodyMedium,),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Email: ${student.email}'),
-                            Text('Phone: ${student.phone}'),
-                            Text('Address: ${student.address}'),
-                            Text('DOB: ${TimeOfDayUtils.dateTimeToString(student.dob)}'),
+                            Text('Email: ${student.email}', style: Theme.of(context).textTheme.bodySmall,),
+                            Text('Phone: ${student.phone}', style: Theme.of(context).textTheme.bodySmall,),
+                            Text('Address: ${student.address}', style: Theme.of(context).textTheme.bodySmall,),
+                            Text('DOB: ${TimeOfDayUtils.dateTimeToString(student.dob)}',
+                              style: Theme.of(context).textTheme.bodySmall,),
                           ],
                         ),
                         isThreeLine: true,

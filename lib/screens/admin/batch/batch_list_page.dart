@@ -5,7 +5,7 @@ import 'student_batch_page.dart';
 import '../../../Utils/ui_utils.dart';
 import '../../../helpers/batch_helper.dart';
 import '../../../models/batch.dart';
-import '../student_attendance_page.dart';
+import '../attendance/student_attendance_page.dart';
 
 class BatchListPage extends StatefulWidget {
   final String destinationPage;
@@ -137,6 +137,7 @@ class BatchListPageState extends State<BatchListPage> {
                         );
                       }
                     },
+                  //trailing: IconButton(onPressed: {}, icon: )
                   ),
                 );
               },

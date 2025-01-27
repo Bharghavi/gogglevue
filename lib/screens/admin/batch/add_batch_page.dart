@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gogglevue/Utils/time_of_day_utils.dart';
+import 'package:gogglevue/helpers/staff_assignment_helper.dart';
 
 import '../../../Utils/ui_utils.dart';
 import '../../../helpers/batch_helper.dart';
@@ -18,8 +20,10 @@ class AddBatchPageState extends State<AddBatchPage> {
   final TextEditingController _batchNameController = TextEditingController();
   final TextEditingController _startTimeController = TextEditingController();
   final TextEditingController _endTimeController = TextEditingController();
+  final TextEditingController _fromDateController = TextEditingController();
   TimeOfDay? startTime;
   TimeOfDay? endTime;
+  DateTime _startDate = DateTime.now();
   final TextEditingController _addressController = TextEditingController();
 
   String? selectedInstructorId;
@@ -125,12 +129,15 @@ class AddBatchPageState extends State<AddBatchPage> {
       UIUtils.showMessage(context, 'End time must be after start time.');
       return;
     }
+    if (_fromDateController.text.isEmpty) {
+      UIUtils.showMessage(context, 'Please enter start date');
+      return;
+    }
 
     try {
       final newBatch = await BatchHelper.createNewBatch(
           _batchNameController.text,
           true,
-          selectedInstructorId!,
           selectedCourseId!,
           '',
           selectedDays,
@@ -138,11 +145,15 @@ class AddBatchPageState extends State<AddBatchPage> {
           endTime!,
           _addressController.text);
 
+      await StaffAssignmentHelper.assignStaff(newBatch.id!, selectedInstructorId!, _startDate, null);
+
       if (mounted) {
         UIUtils.showMessage(context, 'Batch saved successfully');
         Navigator.pop(context, newBatch);
       }
-    } catch (e) {
+    } catch (e, stack) {
+      print(e);
+      print(stack);
       if (mounted) {
         UIUtils.showErrorDialog(context, 'Error saving batch', '$e');
       }
@@ -169,27 +180,6 @@ class AddBatchPageState extends State<AddBatchPage> {
                   labelText: 'Batch Name',
                   border: OutlineInputBorder(),
                 ),
-              ),
-              SizedBox(height: 16),
-
-              // Instructor Dropdown
-              DropdownButtonFormField<String>(
-                value: selectedInstructorId,
-                decoration: InputDecoration(
-                  labelText: 'Select Coach/Instructor',
-                  border: OutlineInputBorder(),
-                ),
-                items: fetchedInstructors.map((staff) {
-                  return DropdownMenuItem(
-                    value: staff.id,
-                    child: Text(staff.name),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedInstructorId = value;
-                  });
-                },
               ),
               SizedBox(height: 16),
 
@@ -224,7 +214,7 @@ class AddBatchPageState extends State<AddBatchPage> {
               SizedBox(height: 16),
 
               // Schedule Days
-              Text('Select Days of the Week', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text('Select Days of the Week', style: Theme.of(context).textTheme.bodyMedium),
               Wrap(
                 spacing: 8.0,
                 children: daysOfWeek.map((day) {
@@ -270,6 +260,45 @@ class AddBatchPageState extends State<AddBatchPage> {
               ),
               SizedBox(height: 16),
 
+              Text('Instructor Details', style: Theme.of(context).textTheme.bodyMedium),
+              SizedBox(height: 8),
+
+              // Instructor Dropdown
+              DropdownButtonFormField<String>(
+                value: selectedInstructorId,
+                decoration: InputDecoration(
+                  labelText: 'Select Coach/Instructor',
+                  border: OutlineInputBorder(),
+                ),
+                items: fetchedInstructors.map((staff) {
+                  return DropdownMenuItem(
+                    value: staff.id,
+                    child: Text(staff.name),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedInstructorId = value;
+                  });
+                },
+              ),
+              SizedBox(height: 16),
+
+              // From Date Picker
+              TextField(
+                controller: _fromDateController,
+                readOnly: true,
+                decoration: InputDecoration(
+                  labelText: 'Start Date',
+                  border: OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.calendar_today),
+                    onPressed: () => _selectFromDate(_fromDateController),
+                  ),
+                ),
+              ),
+              SizedBox(height: 16),
+
               // Save Button
               ElevatedButton(
                 onPressed: _saveBatch,
@@ -281,4 +310,21 @@ class AddBatchPageState extends State<AddBatchPage> {
       ),
     );
   }
+
+  void _selectFromDate(TextEditingController controller) async {
+    DateTime? selectedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+
+    if (selectedDate != null) {
+      setState(() {
+        _startDate = selectedDate;
+        controller.text = TimeOfDayUtils.dateTimeToString(selectedDate);
+      });
+    }
+  }
+
 }

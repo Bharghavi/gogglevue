@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
 import '../Utils/time_of_day_utils.dart';
 import '../constants.dart';
@@ -43,7 +44,7 @@ class AttendanceHelper {
     await FirebaseFirestore.instance.collection(K.attendanceCollection).add(attendance.toMap());
   }
 
-  static Future<Map<DateTime, bool>> fetchAttendanceBetweenDatesFor(
+  static Future<List<List<DateTime>>> fetchAttendanceBetweenDatesFor(
       String studentId,
       String batchId,
       DateTime startDate,
@@ -53,6 +54,10 @@ class AttendanceHelper {
       Timestamp startTimestamp = Timestamp.fromDate(TimeOfDayUtils.normalizeDate(startDate));
       Timestamp endTimestamp = Timestamp.fromDate(TimeOfDayUtils.normalizeDate(endDate));
 
+      List<DateTime> presentDays = [];
+      List<DateTime> absentDays = [];
+      List<DateTime> sessionCanceled = [];
+
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection(K.attendanceCollection)
           .where(K.batchId, isEqualTo: batchId)
@@ -60,18 +65,31 @@ class AttendanceHelper {
           .where(K.date, isLessThanOrEqualTo: endTimestamp)
           .get();
 
-      Map<DateTime, bool> attendanceMap = {};
-
       for (var doc in querySnapshot.docs) {
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
-        Map<String, bool> studentAttendance = Map<String, bool>.from(data['studentAttendance'] ?? {});
-        if (studentAttendance.containsKey(studentId)) {
-          DateTime date = (data['date'] as Timestamp).toDate();
-          attendanceMap[date] = studentAttendance[studentId]!;
+        DateTime date = (data[K.date] as Timestamp).toDate();
+        if (data['isSessionCancelled'] as bool) {
+          sessionCanceled.add(date);
+        }
+        else {
+          Map<String, bool> studentAttendance = Map<String, bool>.from(
+              data['studentAttendance'] ?? {});
+          if (studentAttendance.containsKey(studentId)) {
+            if (studentAttendance[studentId] as bool) {
+              presentDays.add(date);
+            } else {
+              absentDays.add(date);
+            }
+          }
         }
       }
-      return attendanceMap;
+
+      List<List<DateTime>> result = [];
+      result.add(presentDays);
+      result.add(sessionCanceled);
+      result.add(absentDays);
+      return result;
 
   }
 

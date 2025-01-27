@@ -3,11 +3,13 @@ import '/Utils/time_of_day_utils.dart';
 
 class DateSelector extends StatefulWidget {
   final DateTime initialDate;
+  final DateTime? firstDate;
   final ValueChanged<DateTime> onDateChanged;
 
   const DateSelector({
     super.key,
     required this.initialDate,
+    this.firstDate,
     required this.onDateChanged,
   });
 
@@ -28,7 +30,7 @@ class DateSelectorState extends State<DateSelector> {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: selectedDate,
-      firstDate: DateTime(2000),
+      firstDate: widget.firstDate ?? DateTime(2000),
       lastDate: DateTime(2100),
     );
     if (pickedDate != null && pickedDate != selectedDate) {
@@ -41,20 +43,24 @@ class DateSelectorState extends State<DateSelector> {
 
   void _changeDate(int days) {
     final updatedDate = selectedDate.add(Duration(days: days));
-    setState(() {
-      selectedDate = updatedDate;
-    });
-    widget.onDateChanged(updatedDate);
+    if (widget.firstDate == null || updatedDate.isAfter(widget.firstDate!)) {
+      setState(() {
+        selectedDate = updatedDate;
+      });
+      widget.onDateChanged(updatedDate);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final bool canGoBack = widget.firstDate == null || selectedDate.isAfter(widget.firstDate!);
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         IconButton(
           icon: Icon(Icons.arrow_left),
-          onPressed: () => _changeDate(-1),
+          onPressed: canGoBack ? () => _changeDate(-1) : null,
         ),
         GestureDetector(
           onTap: () => _selectDate(context),
@@ -76,3 +82,4 @@ class DateSelectorState extends State<DateSelector> {
     );
   }
 }
+

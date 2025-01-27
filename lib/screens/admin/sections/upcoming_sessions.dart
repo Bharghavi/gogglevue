@@ -35,7 +35,6 @@ class UpcomingSessionsSectionState extends State<UpcomingSessionsSection> {
       });
 
     } catch (e) {
-      print(e);
       setState(() {
         today = [];
         tomorrow = [];
@@ -92,9 +91,10 @@ class UpcomingSessionsSectionState extends State<UpcomingSessionsSection> {
           if (today.isEmpty && tomorrow.isNotEmpty) ...[
             ...tomorrow.map((session) => ListTile(
               leading: const Icon(Icons.schedule, color: Colors.blue),
-              title: Text(session.name),
+              title: Text(session.name, style: Theme.of(context).textTheme.bodyMedium,),
               subtitle: Text(
                 'Tomorrow at ${TimeOfDayUtils.timeOfDayToString(session.startTime)}',
+                style: Theme.of(context).textTheme.bodySmall,
               ),
               onTap: () {
                 Navigator.push(

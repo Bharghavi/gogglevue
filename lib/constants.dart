@@ -32,20 +32,26 @@ class K {
   static const String lessonPlanCollection = 'LessonPlan';
   static const String paymentCollection = 'Payment';
   static const String attendanceCollection = 'Attendance';
+  static const String staffAssignmentCollection = 'StaffAssignment';
 
-  static const String email = 'email';
   static const String adminId = 'adminId';
-  static const String active = 'active';
   static const String batchId = 'batchId';
   static const String studentId = 'studentId';
   static const String userId = 'userId';
   static const String courseId = 'courseId';
+  static const String staffId = 'staffId';
+
+  static const String email = 'email';
+  static const String active = 'active';
   static const String studentCount = 'studentCount';
-  static const String date = 'date';
   static const String lessons = 'lessons';
+
+  static const String date = 'date';
   static const String paymentDate = 'paymentDate';
   static const String scheduleDays = 'scheduleDays';
   static const String startTime = 'startTime';
   static const String isPresent = 'isPresent';
   static const String joiningDate = 'joiningDate';
+  static const String startDate = 'startDate';
+  static const String endDate = 'endDate';
 }

@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:gogglevue/Utils/time_of_day_utils.dart';
-import '../helpers/admin_helper.dart';
-import '../helpers/batch_helper.dart';
+import 'student_helper.dart';
+import '../Utils/time_of_day_utils.dart';
+import 'admin_helper.dart';
+import 'batch_helper.dart';
 import '../models/batch.dart';
 import '../models/student.dart';
 import '../models/student_batch.dart';
@@ -61,7 +62,7 @@ class StudentBatchHelper {
     List<Student> studentsInBatch = await fetchAllStudentsFor(batchId);
 
     if (studentsInBatch.isEmpty) {
-      return [];
+      return StudentHelper.fetchAllStudents();
     }
 
     List<String> studentIdsInBatch = studentsInBatch.map((student) => student.id!).toList();
@@ -126,5 +127,15 @@ class StudentBatchHelper {
     }).toList());
 
     return result;
+  }
+
+  static Future<DateTime> getStudentJoiningDate(String studentId, String batchId) async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection(K.studentBatchCollection)
+        .where(K.studentId, isEqualTo: studentId)
+        .where(K.batchId, isEqualTo: batchId)
+        .get();
+
+    return (querySnapshot.docs.first[K.joiningDate] as Timestamp).toDate();
   }
 }

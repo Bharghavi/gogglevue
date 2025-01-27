@@ -3,13 +3,12 @@ import 'package:flutter/material.dart';
 import '../Utils/time_of_day_utils.dart';
 
 class Batch {
-  final String? id;
+  String? id;
   final String adminId;
   String name;
   int studentCount;
   final String courseId;
   bool active;
-  String instructor;
   String notes;
   List<String> scheduleDays;
   TimeOfDay startTime;
@@ -24,7 +23,6 @@ class Batch {
     required this.studentCount,
     required this.courseId,
     this.active = true,
-    required this.instructor,
     this.notes = '',
     required this.scheduleDays,
     required this.startTime,
@@ -34,12 +32,12 @@ class Batch {
 
   Map<String, dynamic> toMap() {
     return {
+      'id': id,
       'adminId': adminId,
       'name': name,
       'studentCount': studentCount,
       'courseId': courseId,
       'active' : active,
-      'instructor': instructor,
       'notes': notes,
       'scheduleDays': scheduleDays,
       'startTime': TimeOfDayUtils.timeOfDayToString(startTime),
@@ -58,7 +56,6 @@ class Batch {
       studentCount: map['studentCount'] ?? 0,
       courseId: map['courseId']?? '',
       active: map['active'] ?? true,
-      instructor: map['instructor'] ?? '',
       notes: map['notes'] ?? '',
       scheduleDays: List<String>.from(map['scheduleDays']),
       startTime: TimeOfDayUtils.stringToTimeOfDay(map['startTime']),

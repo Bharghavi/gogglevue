@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../helpers/staff_helper.dart';
+import 'package:gogglevue/Utils/time_of_day_utils.dart';
+import '../../../helpers/staff_assignment_helper.dart';
 import '../../../helpers/batch_helper.dart';
 import '/screens/admin/batch/batch_details_card.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -25,6 +26,7 @@ class StudentBatchPageState extends State<StudentBatchPage> {
   DateTime? joiningDate;
   bool isLoading = false;
   String staffName = '';
+  DateTime firstDate = DateTime(2000);
 
   @override
   void initState() {
@@ -39,15 +41,20 @@ class StudentBatchPageState extends State<StudentBatchPage> {
       });
       final studentList = await StudentBatchHelper.fetchAllStudentsFor(widget.batch.id!);
       final fetchStudentsNotInBatch = await StudentBatchHelper.fetchAllStudentsNotInBatch(widget.batch.id!);
-      final fetchedStaff = await StaffHelper.getStaffForBatch(widget.batch.id!);
+      final fetchedStaff = await StaffAssignmentHelper.getStaffFor(widget.batch.id!, DateTime.now());
+      final fetchedFirstDate = await StaffAssignmentHelper.getFirstDateForBatch(widget.batch.id!);
       setState(() {
         studentsNotInBatch.addAll(fetchStudentsNotInBatch);
         studentsInBatch.addAll(studentList);
-        staffName = fetchedStaff!.name;
+        if (fetchedStaff != null) {
+          staffName = fetchedStaff.name;
+        }
+        firstDate = fetchedFirstDate;
         isLoading = false;
       });
 
     } catch (e) {
+      print(e);
       setState(() {
         isLoading = false;
       });
@@ -63,70 +70,86 @@ class StudentBatchPageState extends State<StudentBatchPage> {
     await showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Text('Add Student to Batch'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              DropdownButtonFormField<Student>(
-                items: studentsNotInBatch.map((student) {
-                  return DropdownMenuItem<Student>(
-                    value: student,
-                    child: Text('${student.name} '),
-                  );
-                }).toList(),
-                onChanged: (student) {
-                  selectedStudent = student;
-                },
-                decoration: InputDecoration(
-                  labelText: 'Select Student',
-                  border: OutlineInputBorder(),
+        return StatefulBuilder(
+          builder: (BuildContext context, void Function(void Function()) setDialogState) {
+            return AlertDialog(
+              title: Text(
+                'Add Student to Batch',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  DropdownButtonFormField<Student>(
+                    value: selectedStudent,
+                    items: studentsNotInBatch.map((student) {
+                      return DropdownMenuItem<Student>(
+                        value: student,
+                        child: Text(
+                          student.name,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (student) {
+                      setDialogState(() {
+                        selectedStudent = student;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      labelText: 'Select Student',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  TextButton(
+                    onPressed: () async {
+                      final pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: firstDate,
+                        lastDate: DateTime(2100),
+                      );
+                      if (pickedDate != null) {
+                        setDialogState(() {
+                          joiningDate = pickedDate;
+                        });
+                      }
+                    },
+                    child: Text(
+                      joiningDate == null
+                          ? 'Select Joining Date'
+                          : 'Joining Date: ${TimeOfDayUtils.dateTimeToString(joiningDate!)}',
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text('Cancel'),
                 ),
-              ),
-              SizedBox(height: 16),
-              TextButton(
-                onPressed: () async {
-                  final pickedDate = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2100),
-                  );
-                  if (pickedDate != null) {
-                    setState(() {
-                      joiningDate = pickedDate;
-                    });
-                  }
-                },
-                child: Text(joiningDate == null
-                    ? 'Select Joining Date'
-                    : 'Joining Date: ${joiningDate.toString().split(' ')[0]}'),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (selectedStudent != null && joiningDate != null) {
-                  Navigator.of(context).pop();
-                } else {
-                  UIUtils.showMessage(
-                      context, 'Please select a student and joining date.');
-                }
-              },
-              child: Text('Add'),
-            ),
-          ],
+                ElevatedButton(
+                  onPressed: () {
+                    if (selectedStudent != null && joiningDate != null) {
+                      _addStudentAction();
+                      Navigator.of(context).pop();
+                    } else {
+                      UIUtils.showMessage(
+                        context, 'Please select a student and joining date.',
+                      );
+                    }
+                  },
+                  child: Text('Add'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
-
-   _addStudentAction();
   }
+
 
   void _addStudentAction() async {
     if (selectedStudent != null && joiningDate != null) {
@@ -143,6 +166,8 @@ class StudentBatchPageState extends State<StudentBatchPage> {
           widget.batch.studentCount += 1;
           studentsInBatch.add(selectedStudent!);
           studentsNotInBatch.remove(selectedStudent);
+          selectedStudent = null;
+          joiningDate = null;
           isLoading = false;
         });
         if (mounted) {
@@ -176,11 +201,15 @@ class StudentBatchPageState extends State<StudentBatchPage> {
         title: 'Remove Student',
         content: 'Are you sure you want to remove ${student.name} from batch?',
         onConfirm: () {
+        setState(() {
+          isLoading = true;
+        });
         StudentBatchHelper.deleteStudentFromBatch(student.id!, widget.batch.id!).then((_) {
           setState(() {
             studentsInBatch.remove(student);
             studentsNotInBatch.add(student);
             widget.batch.studentCount -= 1;
+            isLoading = false;
           });
           if (mounted) {
             UIUtils.showMessage(context, 'Student removed successfully');
@@ -258,7 +287,6 @@ class StudentBatchPageState extends State<StudentBatchPage> {
                       margin: EdgeInsets.all(8),
                       child: ListTile(
                         title: Text(student.name, style: Theme.of(context).textTheme.bodyMedium,),
-                        //subtitle: Text('Address: ${student.address}'),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min, // Ensures the row takes up minimal space
                           children: [
