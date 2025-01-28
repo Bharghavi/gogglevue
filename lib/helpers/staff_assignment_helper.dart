@@ -50,6 +50,8 @@ class StaffAssignmentHelper {
       endDate: normalizedEndDate,
     );
 
+    print('end date - ${newStaff.endDate}');
+
     await FirebaseFirestore.instance
         .collection(K.staffAssignmentCollection)
         .add(newStaff.toMap());

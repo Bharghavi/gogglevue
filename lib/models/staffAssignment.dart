@@ -21,7 +21,7 @@ class StaffAssignment {
       'batchId': batchId,
       'adminId': adminId,
       'startDate': Timestamp.fromDate(startDate),
-      if (endDate != null) 'endDate': Timestamp.fromDate(endDate!),
+      'endDate': endDate != null ? Timestamp.fromDate(endDate!) : null,
     };
   }
 }

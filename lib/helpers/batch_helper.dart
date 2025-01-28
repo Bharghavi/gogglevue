@@ -35,6 +35,21 @@ class BatchHelper {
   static Future<void> deleteBatch(Batch batch) async {
     final batchDocRef = FirebaseFirestore.instance.collection(K.batchCollection).doc(batch.id);
     batchDocRef.delete();
+
+    final staffsInBatch = await FirebaseFirestore.instance.collection(K.staffAssignmentCollection)
+        .where(K.batchId, isEqualTo: batch.id)
+        .get();
+
+    for (final doc in staffsInBatch.docs) {
+      await doc.reference.delete();
+    }
+  }
+
+  static Future<bool> canDeleteBatch(String batchId) async {
+    final studentsInBatch = await FirebaseFirestore.instance.collection(K.studentBatchCollection)
+        .where(K.batchId, isEqualTo: batchId)
+        .get();
+     return studentsInBatch.docs.isEmpty;
   }
 
   static Future<Batch> createNewBatch(String name, bool active, String courseId, String notes, List<String> scheduleDays, TimeOfDay startTime, TimeOfDay endTime, String address) async{

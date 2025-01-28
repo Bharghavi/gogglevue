@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gogglevue/Utils/time_of_day_utils.dart';
+import '../../../Utils/time_of_day_utils.dart';
 import '../../../helpers/staff_assignment_helper.dart';
-import '../../../helpers/batch_helper.dart';
 import '/screens/admin/batch/batch_details_card.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../Utils/ui_utils.dart';
@@ -185,17 +184,6 @@ class StudentBatchPageState extends State<StudentBatchPage> {
     }
   }
 
-  void _removeBatch(Batch batch) async {
-    UIUtils.showConfirmationDialog(context: context,
-        title: 'Remove Batch',
-        content: 'Are you sure you want to delete this batch?',
-        onConfirm: () {
-          Navigator.pop(context, batch.id);
-          BatchHelper.deleteBatch(batch);
-        });
-  }
-
-
   void _removeStudent(Student student) async {
     UIUtils.showConfirmationDialog(context: context,
         title: 'Remove Student',
@@ -266,17 +254,6 @@ class StudentBatchPageState extends State<StudentBatchPage> {
                   children: [
                     Text('No students added yet.', style: Theme.of(context).textTheme.bodyMedium),
                     const SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        _removeBatch(widget.batch);
-                      },
-                      icon: const Icon(Icons.delete),
-                      label: const Text('Delete Batch'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        foregroundColor: Colors.white,
-                      ),
-                    ),
                   ],
                 )
                     : ListView.builder(

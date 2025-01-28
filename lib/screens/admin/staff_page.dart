@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import '../../Utils/time_of_day_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../models/staff.dart';
 import '../../helpers/staff_helper.dart';
 import '../../Utils/ui_utils.dart';
 
 class StaffPage extends StatefulWidget {
-  const StaffPage({Key? key}) : super(key: key);
+  const StaffPage({super.key});
 
   @override
   StaffPageState createState() => StaffPageState();
@@ -27,7 +28,9 @@ class StaffPageState extends State<StaffPage> {
         staffList = fetchedStaff;
       });
     } catch (e) {
+      if (mounted) {
       UIUtils.showMessage(context, 'Failed to fetch staff: $e');
+      }
     }
   }
 
@@ -40,7 +43,9 @@ class StaffPageState extends State<StaffPage> {
         staffList.add(newStaff);
       });
     } catch (e) {
-      UIUtils.showMessage(context, 'Error occurred: $e');
+      if (mounted) {
+        UIUtils.showMessage(context, 'Error occurred: $e');
+      }
     }
   }
 
@@ -180,11 +185,10 @@ class StaffPageState extends State<StaffPage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Title
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              'Staff Management',
+              'Staff',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
           ),
@@ -194,7 +198,7 @@ class StaffPageState extends State<StaffPage> {
                 ? Center(
               child: Text(
                 'No staff available',
-                style: TextStyle(fontSize: 18, color: Colors.grey),
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
             )
                 : ListView.builder(
@@ -202,13 +206,13 @@ class StaffPageState extends State<StaffPage> {
               itemBuilder: (context, index) {
                 final staff = staffList[index];
                 return ListTile(
-                  title: Text(staff.name),
+                  title: Text(staff.name, style: Theme.of(context).textTheme.bodyMedium),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Email: ${staff.email}'),
-                      Text('Address: ${staff.address}'),
-                      Text('DOB: ${staff.dob.toLocal().toString().split(' ')[0]}'),
+                      Text('Email: ${staff.email}', style: Theme.of(context).textTheme.bodySmall),
+                      Text('Address: ${staff.address}', style: Theme.of(context).textTheme.bodySmall),
+                      Text('DOB: ${TimeOfDayUtils.dateTimeToString(staff.dob)}', style: Theme.of(context).textTheme.bodySmall),
                     ],
                   ),
                   isThreeLine: true,
@@ -238,7 +242,7 @@ class StaffPageState extends State<StaffPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: showAddStaffDialog,
-        child: Icon(Icons.add),
+        child: Icon(Icons.add, color: Colors.white,),
       ),
     );
   }

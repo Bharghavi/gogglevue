@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'add_batch_page.dart';
 import '../lesson_plan_page.dart';
+import 'edit_batch_dialog.dart';
 import 'student_batch_page.dart';
 import '../../../Utils/ui_utils.dart';
 import '../../../helpers/batch_helper.dart';
@@ -137,7 +138,19 @@ class BatchListPageState extends State<BatchListPage> {
                         );
                       }
                     },
-                  //trailing: IconButton(onPressed: {}, icon: )
+                  trailing: widget.destinationPage == 'batchDetails' ?
+                Row(
+                mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.edit, color: Colors.blue,),
+                      onPressed: () => {openEditDialog(context, batch )},),
+                    IconButton(
+                    icon: Icon(Icons.delete, color: Colors.red,),
+                    onPressed: () => {_removeBatch(batch)},),
+                  ],
+                ) :
+                  null,
                   ),
                 );
               },
@@ -166,4 +179,36 @@ class BatchListPageState extends State<BatchListPage> {
     );
   }
 
+  void _removeBatch(Batch batch) async {
+    bool canDeleteFromDb = await BatchHelper.canDeleteBatch(batch.id!);
+
+    if (!canDeleteFromDb) {
+      UIUtils.showErrorDialog(context, 'Delete batch', 'You cannot delete a batch with active students');
+      return;
+    }
+
+    UIUtils.showConfirmationDialog(context: context,
+        title: 'Remove Batch',
+        content: 'Are you sure you want to delete this batch?',
+        onConfirm: () {
+          BatchHelper.deleteBatch(batch);
+          UIUtils.showMessage(context, 'Batch deleted successfully');
+          setState(() {
+            batches.remove(batch);
+          });
+        });
+  }
+
+  void openEditDialog(BuildContext context, Batch batch) async {
+    final updatedBatch = await showDialog<Batch>(
+      context: context,
+      builder: (context) => EditBatchDialog(batch: batch),
+    );
+
+    if (updatedBatch != null) {
+      setState(() {
+        batch = updatedBatch;
+      });
+    }
+  }
 }
