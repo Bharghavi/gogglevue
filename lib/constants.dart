@@ -2,7 +2,7 @@ import 'dart:core' show String;
 
 class K {
   // App Titles
-  static const String appTitle = 'GoggleVue';
+  static const String appTitle = 'Aarambha';
   static const String loginPageTitle = 'Login Page';
 
   // Roles
@@ -22,6 +22,7 @@ class K {
   static const String logoImagePath = 'assets/images/logo.png';
 
   //DB Collections
+  static const String adminDatabaseCollection = 'AdminDatabases';
   static const String adminCollection = 'Admin';
   static const String staffCollection = 'Staff';
   static const String studentCollection = 'Student';
@@ -34,6 +35,7 @@ class K {
   static const String attendanceCollection = 'Attendance';
   static const String staffAssignmentCollection = 'StaffAssignment';
 
+  static const String databaseId = 'databaseId';
   static const String adminId = 'adminId';
   static const String batchId = 'batchId';
   static const String studentId = 'studentId';

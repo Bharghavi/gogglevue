@@ -1,5 +1,6 @@
+import '/managers/database_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:gogglevue/Utils/ui_utils.dart';
+import '../Utils/ui_utils.dart';
 import 'admin/admin_home.dart';
 import 'staff/staff_home.dart';
 import 'student/student_home.dart';
@@ -62,12 +63,21 @@ class LoginPageState extends State<LoginPage> {
     }
   }
 
-  void _navigateToHomePage(String role) {
+  void _navigateToHomePage(String role) async {
     if (role == 'Admin') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => AdminHomePage()),
-      );
+      String? adminDb = await DatabaseManager.getAdminDatabaseId();
+
+      if (adminDb != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => AdminHomePage()),
+        );
+      } else {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => RegistrationPage()),
+        );
+      }
     } else if (role == 'Staff') {
       Navigator.push(
         context,
@@ -110,20 +120,13 @@ class LoginPageState extends State<LoginPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Center(
-                    child: Image.asset(
-                      K.logoImagePath,
-                      height: 120,
-                    ),
-                  ),
-                  const SizedBox(height: 24.0),
                   DropdownButton<String>(
                     value: _selectedRole,
                     items: [K.roleAdmin, K.roleStaff, K.roleStudent]
                         .map(
                           (role) => DropdownMenuItem(
                         value: role,
-                        child: Text(role),
+                        child: Text(role, style: Theme.of(context).textTheme.bodySmall,),
                       ),
                     )
                         .toList(),
@@ -134,60 +137,78 @@ class LoginPageState extends State<LoginPage> {
                     },
                   ),
                   const SizedBox(height: 16.0),
-                  TextField(
-                    controller: _usernameController,
-                    decoration: const InputDecoration(
-                      labelText: K.usernameLabel,
-                      border: OutlineInputBorder(),
+
+                  Center(
+                    child: Image.asset(
+                      'assets/images/aarambha.png',
+                      height: 150,
+                      width: 200,
+                      fit: BoxFit.contain,
                     ),
                   ),
                   const SizedBox(height: 16.0),
-                  TextField(
-                    controller: _passwordController,
-                    obscureText: true,
-                    decoration: const InputDecoration(
-                      labelText: K.passwordLabel,
-                      border: OutlineInputBorder(),
+
+                  if (_selectedRole != K.roleAdmin) ...[
+                    TextField(
+                      controller: _usernameController,
+                      decoration: const InputDecoration(
+                        labelText: K.usernameLabel,
+                        border: OutlineInputBorder(),
+                      ),
                     ),
-                    onSubmitted: (_) {
-                      _login();
-                    },
-                  ),
-                  const SizedBox(height: 24.0),
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: rememberMe,
-                        onChanged: (value) {
-                          setState(() {
-                            rememberMe = value!;
-                          });
-                        },
+                    const SizedBox(height: 16.0),
+                    TextField(
+                      controller: _passwordController,
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                        labelText: K.passwordLabel,
+                        border: OutlineInputBorder(),
                       ),
-                      const Text("Remember Me"),
-                      const Spacer(),
-                      TextButton(
-                        onPressed: _forgotPassword,
-                        child: const Text("Forgot Password?"),
-                      ),
-                    ],
-                  ),
-                  if (_selectedRole == K.roleAdmin) ...[
+                      onSubmitted: (_) {
+                        _login();
+                      },
+                    ),
+                    const SizedBox(height: 24.0),
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: rememberMe,
+                          onChanged: (value) {
+                            setState(() {
+                              rememberMe = value!;
+                            });
+                          },
+                        ),
+                        const Text("Remember Me"),
+                        const Spacer(),
+                        TextButton(
+                          onPressed: _forgotPassword,
+                          child: const Text("Forgot Password?"),
+                        ),
+                      ],
+                    ),
                     ElevatedButton(
                       onPressed: _login,
                       child: const Text(K.loginButton),
                     ),
                     const SizedBox(height: 8.0),
-                    ElevatedButton(
-                      onPressed: _register,
-                      child: const Text(K.registerButton),
-                    ),
-                  ] else ...[
-                    ElevatedButton(
-                      onPressed: _login,
-                      child: const Text(K.loginButton),
-                    ),
+                    if (_selectedRole == K.roleStudent || _selectedRole == K.roleStaff)
+                      ElevatedButton(
+                        onPressed: _register,
+                        child: const Text(K.registerButton),
+                      ),
                   ],
+
+                  // Google Sign-in button (always visible for Admin, optional for others)
+                  ElevatedButton(
+                    onPressed: () async {
+                      final userCredential = await LoginManager.signInWithGoogle(_selectedRole);
+                      if (userCredential != null) {
+                        _navigateToHomePage(_selectedRole);
+                      }
+                    },
+                    child: const Text("Sign in with Google"),
+                  ),
                 ],
               ),
             ),
@@ -196,6 +217,7 @@ class LoginPageState extends State<LoginPage> {
       ),
     );
   }
+
 
   void _forgotPassword() {
     showDialog(

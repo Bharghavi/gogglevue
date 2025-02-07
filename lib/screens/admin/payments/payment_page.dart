@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gogglevue/Utils/time_of_day_utils.dart';
+import '../../../Utils/time_of_day_utils.dart';
 import '../../../helpers/batch_helper.dart';
 import '../../../helpers/student_helper.dart';
 import '../../../Utils/ui_utils.dart';

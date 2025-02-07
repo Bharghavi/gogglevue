@@ -25,7 +25,7 @@ class AdminHelper {
       throw Exception('Admin profile not found for the email: $email');
     }
 
-    String adminId = querySnapshot.docs[0].id; // adminId is the document ID
+    String adminId = querySnapshot.docs[0].id;
 
     return adminId;
   }

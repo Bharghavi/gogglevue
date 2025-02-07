@@ -14,9 +14,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
   final TextEditingController _dobController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _instituteNameController = TextEditingController();
+  final TextEditingController _instituteAddressController = TextEditingController();
+
 
   final helper = RegistrationHelper();
 
@@ -42,26 +42,15 @@ class _RegistrationPageState extends State<RegistrationPage> {
     final dob = _dobController.text;
     final address = _addressController.text;
     final phone = _phoneController.text;
-    final email = _emailController.text;
-    final password = _passwordController.text;
-    final confirmPassword = _confirmPasswordController.text;
+    final instituteName = _instituteNameController.text;
+    final instituteAddress = _instituteAddressController.text;
 
     if (username.isEmpty ||
         dob.isEmpty ||
         address.isEmpty ||
-        phone.isEmpty ||
-        email.isEmpty ||
-        password.isEmpty ||
-        confirmPassword.isEmpty) {
+        phone.isEmpty) {
       if (mounted) {
         _showMessage('All fields are required!');
-      }
-      return;
-    }
-
-    if (password != confirmPassword) {
-      if (mounted) {
-        _showMessage('password does not match');
       }
       return;
     }
@@ -69,7 +58,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
    try {
      final parsedDob = DateTime.parse(dob);
      await helper.registerAdmin(
-         username, email, phone, address, parsedDob, password);
+         username, phone, address, parsedDob, instituteName, instituteAddress, null, null);
     _showMessage('Admin user registered successfully!');
      Future.delayed(Duration(seconds: 2), () {
        if (mounted) {
@@ -150,39 +139,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
               ),
             ),
             const SizedBox(height: 12.0),
-
-            // Email Address
-            TextField(
-              controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
-                labelText: 'Email Address',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 12.0),
-
-            // Password
-            TextField(
-              controller: _passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 24.0),
-
-            // Confirm Password
-            TextField(
-              controller: _confirmPasswordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Confirm Password',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 24.0),
 
             // Register Button
             Center(

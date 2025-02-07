@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:gogglevue/Utils/time_of_day_utils.dart';
+import '../Utils/time_of_day_utils.dart';
 
 import '../constants.dart';
 import '../models/lesson_plan.dart';

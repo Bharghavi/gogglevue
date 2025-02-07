@@ -1,6 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:gogglevue/Utils/time_of_day_utils.dart';
+import '../../../Utils/time_of_day_utils.dart';
 
 import '../../../Utils/ui_utils.dart';
 import '../../../helpers/payment_helper.dart';

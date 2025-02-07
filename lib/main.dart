@@ -4,30 +4,41 @@ import '../screens/themes/theme.dart';
 import '../screens/themes/theme_provider.dart';
 import 'package:provider/provider.dart';
 import '../managers/login_manager.dart';
+import 'managers/database_manager.dart';
 import 'screens/admin/admin_home.dart';
 import 'screens/login_page.dart';
 import 'screens/staff/staff_home.dart';
 import 'screens/student/student_home.dart';
 import 'firebase_options.dart';
 import 'screens/admin/registration_page.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+
+  if (Firebase.apps.isEmpty) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
+
+ /* await FirebaseAppCheck.instance.activate(
+    androidProvider: AndroidProvider.debug,
+    appleProvider: AppleProvider.appAttest,
+  );*/
+
   final initialRoute = await determineInitialRoute();
 
-  runApp(GoggleVue(initialRoute: initialRoute));
+  runApp(Aarambha(initialRoute: initialRoute));
 }
 
 Future<String> determineInitialRoute() async {
-
   bool login = false;
 
   try {
     login = await LoginManager.loginWithSavedCredentials();
   } catch (e) {
+    print (e);
     return '/login';
   }
 
@@ -36,7 +47,8 @@ Future<String> determineInitialRoute() async {
     if (savedRole != null) {
       switch (savedRole) {
         case 'Admin':
-          return '/adminHome';
+          final adminDatabase = await DatabaseManager.getAdminDatabaseId();
+          return adminDatabase != null ? '/adminHome' : '/register';
         case 'Staff':
           return '/staffHome';
         case 'Student':
@@ -50,10 +62,10 @@ Future<String> determineInitialRoute() async {
   return '/login';
 }
 
-class GoggleVue extends StatelessWidget {
+class Aarambha extends StatelessWidget {
   final String initialRoute;
 
-  const GoggleVue({super.key, required this.initialRoute});
+  const Aarambha({super.key, required this.initialRoute});
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +74,7 @@ class GoggleVue extends StatelessWidget {
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
           return MaterialApp(
-            title: 'Your App Title',
+            title: 'Aarambha',
             theme: lightTheme,
             darkTheme: darkTheme,
             themeMode: themeProvider.themeMode,

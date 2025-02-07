@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:gogglevue/Utils/time_of_day_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../models/student.dart';
 import '../../helpers/student_helper.dart';
@@ -114,10 +113,10 @@ class StudentPageState extends State<StudentPage> {
                   onPressed: () {
                     if (name.isEmpty ||
                         email.isEmpty ||
-                        phone.isEmpty ||
+                        phone.isEmpty /*||
                         address.isEmpty ||
-                        dob == null) {
-                      UIUtils.showMessage(context, 'All fields are required!');
+                        dob == null*/) {
+                      UIUtils.showMessage(context, 'Name, email and phone number are required!');
                     } else {
                       addNewStudent(name, email, phone, address, dob!);
                       Navigator.pop(context);
@@ -202,9 +201,9 @@ class StudentPageState extends State<StudentPage> {
                           children: [
                             Text('Email: ${student.email}', style: Theme.of(context).textTheme.bodySmall,),
                             Text('Phone: ${student.phone}', style: Theme.of(context).textTheme.bodySmall,),
-                            Text('Address: ${student.address}', style: Theme.of(context).textTheme.bodySmall,),
-                            Text('DOB: ${TimeOfDayUtils.dateTimeToString(student.dob)}',
-                              style: Theme.of(context).textTheme.bodySmall,),
+                            //Text('Address: ${student.address}', style: Theme.of(context).textTheme.bodySmall,),
+                            //Text('DOB: ${TimeOfDayUtils.dateTimeToString(student.dob)}',
+                              //style: Theme.of(context).textTheme.bodySmall,),
                           ],
                         ),
                         isThreeLine: true,
