@@ -3,7 +3,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ImageUtils {
-  Future<String?> uploadImage(File imageFile, String adminId,
+
+  static Future<String?> uploadImage(File imageFile, String adminId,
       String imageType) async {
     try {
       String fileName = "$adminId/$imageType.jpg"; // Store as "adminId/logo.jpg" or "adminId/profilePic.jpg"
@@ -18,7 +19,7 @@ class ImageUtils {
     }
   }
 
-  Future<File?> pickImage() async {
+  static Future<File?> pickImage() async {
     final ImagePicker picker = ImagePicker();
     final XFile? pickedFile = await picker.pickImage(
         source: ImageSource.gallery);

@@ -1,7 +1,5 @@
 {
   "projects": {
     "default": "aarambha-15705"
-  },
-  "targets": {},
-  "etags": {}
+  }
 }

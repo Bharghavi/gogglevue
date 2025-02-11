@@ -5,6 +5,7 @@ class K {
   static const String appTitle = 'Aarambha';
   static const String loginPageTitle = 'Login Page';
 
+  static const String googleMapsAPIKey = "AIzaSyDSAa8y4GALkDNWMFozhQHQDL1ALsb9Oxc";
   // Roles
   static const String roleAdmin = 'Admin';
   static const String roleStudent = 'Student';
@@ -42,6 +43,7 @@ class K {
   static const String userId = 'userId';
   static const String courseId = 'courseId';
   static const String staffId = 'staffId';
+  static const String instituteId = 'instituteId';
 
   static const String email = 'email';
   static const String active = 'active';
@@ -56,4 +58,9 @@ class K {
   static const String joiningDate = 'joiningDate';
   static const String startDate = 'startDate';
   static const String endDate = 'endDate';
+
+  static const String logo = 'logo';
+  static const String profilePic = 'profilePic';
+
+  static const String defaultDB = 'aarambha-15705';
 }

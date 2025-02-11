@@ -47,8 +47,8 @@ Future<String> determineInitialRoute() async {
     if (savedRole != null) {
       switch (savedRole) {
         case 'Admin':
-          final adminDatabase = await DatabaseManager.getAdminDatabaseId();
-          return adminDatabase != null ? '/adminHome' : '/register';
+          final openHomePage = await DatabaseManager.canOpenAdminHomePage();
+          return openHomePage ? '/adminHome' : '/register';
         case 'Staff':
           return '/staffHome';
         case 'Student':

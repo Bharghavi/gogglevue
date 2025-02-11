@@ -37,6 +37,15 @@ class LoginManager {
     return null;
   }
 
+  static Future<String?> getLoggedInUserName() async {
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      return user.displayName;
+    }
+    return null;
+  }
+
   static Future<bool> login(String email, String password,
       String role, bool rememberMe) async {
 
