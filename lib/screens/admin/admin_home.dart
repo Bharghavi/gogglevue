@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../helpers/admin_helper.dart';
+import '../settings_page.dart';
 import 'batch/batch_list_page.dart';
-import '../../managers/login_manager.dart';
 import 'staff_page.dart';
-import 'course_page.dart';
+import 'course/course_page.dart';
 import 'student_page.dart';
 import 'payments/payment_page.dart';
 import 'admin_home_page.dart';
@@ -16,6 +17,7 @@ class AdminHomePage extends StatefulWidget {
 
 class AdminHomepageState extends State<AdminHomePage> {
   int _currentIndex = 0;
+  String adminName = '';
 
   // List of pages
   final List<Widget> _pages = [
@@ -33,6 +35,15 @@ class AdminHomepageState extends State<AdminHomePage> {
   @override
   void initState() {
     super.initState();
+    getAdminName();
+  }
+
+  Future<void> getAdminName() async {
+    String name = await AdminHelper.getLoggedInAdminName();
+
+    setState(() {
+      adminName = name;
+    });
   }
 
   void _onDrawerItemTapped(int index) {
@@ -42,22 +53,24 @@ class AdminHomepageState extends State<AdminHomePage> {
     Navigator.of(context).pop();
   }
 
-  Future<void> _signOut() async {
-    await LoginManager.signout();
-    if (mounted) {
-      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Admin Homepage'),
+        title: Text('Hi $adminName!'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.exit_to_app),
-            onPressed: _signOut,
+            icon: const Icon(Icons.notifications),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SettingsPage()),
+              );
+            },
           ),
         ],
       ),

@@ -5,13 +5,13 @@ import '../constants.dart';
 
 class CourseHelper {
 
-  static Future<List<Course>> getAllCoursesOffered() async{
+  final FirebaseFirestore _firestore;
+  CourseHelper(this._firestore);
 
-    String adminId = await AdminHelper.getLoggedAdminUserId();
+  Future<List<Course>> getAllCoursesOffered() async{
 
-    QuerySnapshot courseQuerySnapshot = await FirebaseFirestore.instance
+    QuerySnapshot courseQuerySnapshot = await _firestore
         .collection(K.courseCollection)
-        .where(K.adminId, isEqualTo: adminId)
         .get();
 
     List<Course> courses = [];
@@ -25,25 +25,22 @@ class CourseHelper {
     return courses;
   }
 
-  static Future<bool> canDeleteCourse(Course course) async {
-    QuerySnapshot batchQuerySnapshot = await FirebaseFirestore.instance.collection(K.batchCollection)
+  Future<bool> canDeleteCourse(Course course) async {
+    QuerySnapshot batchQuerySnapshot = await _firestore.collection(K.batchCollection)
     .where(K.courseId, isEqualTo: course.courseId!)
     .where(K.active, isEqualTo: true)
         .get();
-    print('course id: ${course.courseId}');
-    print('${batchQuerySnapshot.docs.isEmpty}');
     return batchQuerySnapshot.docs.isEmpty;
   }
 
-  static Future<void> deleteCourse(Course course) async {
-    final docRef = await FirebaseFirestore.instance.collection(K.courseCollection).doc(course.courseId!);
-    docRef.delete();
+  Future<void> deleteCourse(Course course) async {
+    final docRef = _firestore.collection(K.courseCollection).doc(course.courseId!);
+    await docRef.delete();
   }
 
-  static Future<Course> addNewCourse(String courseName, Category category) async{
-    String adminId = await AdminHelper.getLoggedAdminUserId();
-    Course newCourse = Course(name: courseName, category: category, adminId: adminId);
-    await FirebaseFirestore.instance.collection(K.courseCollection).add(newCourse.toMap());
+  Future<Course> addNewCourse(String courseName, Category category) async{
+    Course newCourse = Course(name: courseName, category: category);
+    await _firestore.collection(K.courseCollection).add(newCourse.toMap());
     return newCourse;
   }
 }

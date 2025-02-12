@@ -1,5 +1,4 @@
 import '/managers/database_manager.dart';
-import 'package:firebase_core/firebase_core.dart';
 import '../constants.dart';
 import '../models/admin.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -25,22 +24,8 @@ class RegistrationHelper {
       admin.location = location;
     }
 
-    String? databaseId = await DatabaseManager.getAdminDatabaseId();
-
-    if (databaseId != null) {
-      FirebaseFirestore firestore = FirebaseFirestore.instanceFor(
-        app: Firebase.app(),
-        databaseId: databaseId,
-      );
-      await firestore.collection(K.adminCollection).add(admin.toMap());
-    } else {
-      FirebaseFirestore firestore = FirebaseFirestore.instanceFor(
-        app: Firebase.app(),
-        databaseId: K.defaultDB,
-      );
-      await firestore.collection(K.adminCollection).add(admin.toMap());
-    }
-
-    await DatabaseManager.updateInstituteId(instituteId);
+    FirebaseFirestore firestore = await DatabaseManager.getAdminDatabase();
+    await firestore.collection(K.adminCollection).add(admin.toMap());
+    await DatabaseManager.updateInstituteIdAndAdminId(instituteId, admin.id);
   }
 }

@@ -4,6 +4,7 @@ import '../../../helpers/batch_helper.dart';
 import '../../../helpers/student_helper.dart';
 import '../../../Utils/ui_utils.dart';
 import '../../../helpers/payment_helper.dart';
+import '../../../managers/database_manager.dart';
 import '../../../models/payment.dart';
 import '../../../models/student.dart';
 import 'add_payments.dart';
@@ -29,13 +30,21 @@ class PaymentPageState extends State<PaymentPage> {
   List<Payment> filteredPayments = [];
   bool isLoading = true;
 
+  late BatchHelper batchHelper;
+
   @override
   void initState() {
     super.initState();
+    initialize();
+  }
+
+  Future<void> initialize() async {
+    final firestore = await DatabaseManager.getAdminDatabase();
+    batchHelper = BatchHelper(firestore);
     fetchStudents();
     fetchPayments();
-
   }
+
 
   Future<void> fetchStudents() async {
     try {
@@ -43,7 +52,7 @@ class PaymentPageState extends State<PaymentPage> {
         isLoading = true;
       });
       final fetchedStudents = await StudentHelper.fetchAllStudents();
-      final batches = await BatchHelper.fetchActiveBatches();
+      final batches = await batchHelper.fetchActiveBatches();
       setState(() {
         students = fetchedStudents;
         studentMap = {for (var student in students) student.id!: student.name};

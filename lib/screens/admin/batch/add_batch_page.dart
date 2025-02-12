@@ -1,3 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:place_picker_google/place_picker_google.dart';
+
+import '../../../Utils/location_utils.dart';
+import '/managers/database_manager.dart';
 import 'package:flutter/material.dart';
 import '../../../Utils/time_of_day_utils.dart';
 import '../../../helpers/staff_assignment_helper.dart';
@@ -25,6 +30,7 @@ class AddBatchPageState extends State<AddBatchPage> {
   TimeOfDay? endTime;
   DateTime _startDate = DateTime.now();
   final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
 
   String? selectedInstructorId;
   String? selectedCourseId;
@@ -34,17 +40,28 @@ class AddBatchPageState extends State<AddBatchPage> {
   List<Staff> fetchedInstructors = [];
   List<String> selectedDays = [];
   final List<String> daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  GeoPoint? location;
+
+  late BatchHelper batchHelper;
+  late CourseHelper courseHelper;
 
   @override
   void initState() {
     super.initState();
+    initialize();
+  }
+
+  Future<void> initialize() async {
+    final firestore = await DatabaseManager.getAdminDatabase();
+    batchHelper = BatchHelper(firestore);
+    courseHelper = CourseHelper(firestore);
     fetchCourses();
     fetchInstructors();
   }
 
   Future<void> fetchCourses() async {
     try {
-      fetchedCourses = await CourseHelper.getAllCoursesOffered();
+      fetchedCourses = await courseHelper.getAllCoursesOffered();
       setState(() {
         courses = fetchedCourses.map((course) => course.name).toList();
       });
@@ -135,7 +152,7 @@ class AddBatchPageState extends State<AddBatchPage> {
     }
 
     try {
-      final newBatch = await BatchHelper.createNewBatch(
+      final newBatch = await batchHelper.createNewBatch(
           _batchNameController.text,
           true,
           selectedCourseId!,
@@ -143,7 +160,8 @@ class AddBatchPageState extends State<AddBatchPage> {
           selectedDays,
           startTime!,
           endTime!,
-          _addressController.text);
+          _addressController.text,
+          location);
 
       await StaffAssignmentHelper.assignStaff(newBatch.id!, selectedInstructorId!, _startDate, null);
 
@@ -204,14 +222,29 @@ class AddBatchPageState extends State<AddBatchPage> {
               ),
               SizedBox(height: 16),
 
-              TextField(
-                controller: _addressController,
-                decoration: InputDecoration(
-                  labelText: 'Location',
-                  border: OutlineInputBorder(),
-                ),
+              Row (
+                children: [
+                  Expanded (
+                    child:  TextField(
+                      controller: _addressController,
+                      decoration: InputDecoration(
+                        labelText: 'Location',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    ),
+                      SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: _getLocation,
+                        style: ElevatedButton.styleFrom(
+                          shape: const CircleBorder(),
+                          padding: const EdgeInsets.all(12),
+                        ),
+                        child: const Icon(Icons.location_pin),
+                      ),
+                ],
               ),
-              SizedBox(height: 16),
+
 
               // Schedule Days
               Text('Select Days of the Week', style: Theme.of(context).textTheme.bodyMedium),
@@ -323,6 +356,26 @@ class AddBatchPageState extends State<AddBatchPage> {
       setState(() {
         _startDate = selectedDate;
         controller.text = TimeOfDayUtils.dateTimeToString(selectedDate);
+      });
+    }
+  }
+
+  Future<void> _getLocation() async {
+    LocationResult? locationResult = await LocationUtils.pickLocation(
+      context,
+      _locationController.text,
+    );
+
+    if (locationResult == null) {
+      return;
+    }
+
+    if (locationResult.formattedAddress != null &&
+        locationResult.latLng != null) {
+      setState(() {
+        _addressController.text = locationResult.formattedAddress!;
+        location = GeoPoint(
+            locationResult.latLng!.latitude, locationResult.latLng!.longitude);
       });
     }
   }

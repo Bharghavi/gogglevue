@@ -1,58 +1,32 @@
+import '/managers/database_manager.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../constants.dart';
 
 class AdminHelper {
 
   static Future<String> getLoggedAdminUserId() async {
-    User? user = FirebaseAuth.instance.currentUser;
+    String? adminId = await DatabaseManager.getLoggedInAdminId();
 
-    if (user == null) {
-      throw Exception("User is not logged in");
+    if (adminId == null) {
+      throw Exception('Admin Id not found');
     }
-    if (user.email == null) {
-      throw Exception("User email not found");
-    }
-
-    String email = user.email ?? "No email found";
-
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection(K.adminCollection)
-        .where(K.email, isEqualTo: email)
-        .get();
-
-    if (querySnapshot.docs.isEmpty) {
-      throw Exception('Admin profile not found for the email: $email');
-    }
-
-    String adminId = querySnapshot.docs[0].id;
-
     return adminId;
   }
 
   static Future<String> getLoggedInAdminName() async {
-    User? user = FirebaseAuth.instance.currentUser;
+    FirebaseFirestore firestore = await DatabaseManager.getAdminDatabase();
+    String? adminId = await DatabaseManager.getLoggedInAdminId();
 
-    if (user == null) {
-      throw Exception("User is not logged in");
-    }
-    if (user.email == null) {
-      throw Exception("User email not found");
+    if (adminId == null) {
+      throw Exception('Admin Id not found');
     }
 
-    String email = user.email ?? "No email found";
+    final doc = firestore.collection(K.adminCollection).doc(adminId);
+    final snapshot = await doc.get();
 
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection(K.adminCollection)
-        .where(K.email, isEqualTo: email)
-        .get();
-
-    if (querySnapshot.docs.isEmpty) {
-      throw Exception('Admin profile not found for the email: $email');
+    if (snapshot.exists) {
+      return snapshot.data()?['name'];
     }
-
-    String name = querySnapshot.docs[0]['name']; // adminId is the document ID
-
-    return name;
+    return '';
   }
 }

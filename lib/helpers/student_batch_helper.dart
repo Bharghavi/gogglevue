@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'student_helper.dart';
 import '../Utils/time_of_day_utils.dart';
 import 'admin_helper.dart';
-import 'batch_helper.dart';
 import '../models/batch.dart';
 import '../models/student.dart';
 import '../models/student_batch.dart';
@@ -86,7 +85,6 @@ class StudentBatchHelper {
         .where(K.studentId, isEqualTo: studentId)
         .get();
 
-    await BatchHelper.updateStudentCount(batchId, -1);
     for (QueryDocumentSnapshot doc in querySnapshot.docs) {
       await doc.reference.delete();
     }
@@ -103,7 +101,6 @@ class StudentBatchHelper {
       joiningDate: joiningDate,
       active: true
     );
-    await BatchHelper.updateStudentCount(batchId, 1);
     await FirebaseFirestore.instance.collection(K.studentBatchCollection).add(newStudent.toMap());
     return newStudent;
   }

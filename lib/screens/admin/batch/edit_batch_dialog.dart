@@ -4,6 +4,7 @@ import '../../../helpers/staff_assignment_helper.dart';
 
 import '../../../Utils/time_of_day_utils.dart';
 import '../../../helpers/batch_helper.dart';
+import '../../../managers/database_manager.dart';
 import '../../../models/batch.dart';
 import '../../../models/staff.dart';
 
@@ -28,6 +29,7 @@ class EditBatchDialogState extends State<EditBatchDialog> {
   String? selectedInstructorId;
   DateTime _startDate = DateTime.now();
   List<Staff> fetchedInstructors = [];
+  late BatchHelper batchHelper;
 
   @override
   void initState() {
@@ -36,6 +38,8 @@ class EditBatchDialogState extends State<EditBatchDialog> {
   }
 
   Future<void> initialize() async {
+    final firestore = await DatabaseManager.getAdminDatabase();
+    batchHelper = BatchHelper(firestore);
     final currentStaff = await StaffAssignmentHelper.getStaffFor(widget.batch.id!, DateTime.now());
     final staffList = await StaffHelper.getAllStaff();
     setState(() {
@@ -202,7 +206,7 @@ class EditBatchDialogState extends State<EditBatchDialog> {
             widget.batch.startTime = startTime;
             widget.batch.endTime = endTime;
 
-            await BatchHelper.updateBatch(widget.batch);
+            await batchHelper.updateBatch(widget.batch);
             await StaffAssignmentHelper.assignStaff(
               widget.batch.id!,
               selectedInstructorId!,

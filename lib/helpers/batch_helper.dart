@@ -6,11 +6,15 @@ import '../constants.dart';
 
 class BatchHelper {
 
-  static Future<List<Batch>> fetchActiveBatches() async{
+  final FirebaseFirestore _firestore;
+
+  BatchHelper(this._firestore);
+
+  Future<List<Batch>> fetchActiveBatches() async{
 
     String adminId = await AdminHelper.getLoggedAdminUserId();
 
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+    QuerySnapshot querySnapshot = await _firestore
         .collection(K.batchCollection)
         .where(K.adminId, isEqualTo: adminId)
         .where(K.active, isEqualTo: true)
@@ -22,7 +26,7 @@ class BatchHelper {
 
     List<Batch> batches = await Future.wait(querySnapshot.docs.map((doc) async {
       await resetStudentCount(doc.id);
-      DocumentSnapshot updatedDoc = await FirebaseFirestore.instance
+      DocumentSnapshot updatedDoc = await _firestore
           .collection(K.batchCollection)
           .doc(doc.id)
           .get();
@@ -32,11 +36,11 @@ class BatchHelper {
     return batches;
   }
 
-  static Future<void> deleteBatch(Batch batch) async {
-    final batchDocRef = FirebaseFirestore.instance.collection(K.batchCollection).doc(batch.id);
+  Future<void> deleteBatch(Batch batch) async {
+    final batchDocRef = _firestore.collection(K.batchCollection).doc(batch.id);
     batchDocRef.delete();
 
-    final staffsInBatch = await FirebaseFirestore.instance.collection(K.staffAssignmentCollection)
+    final staffsInBatch = await _firestore.collection(K.staffAssignmentCollection)
         .where(K.batchId, isEqualTo: batch.id)
         .get();
 
@@ -45,17 +49,15 @@ class BatchHelper {
     }
   }
 
-  static Future<bool> canDeleteBatch(String batchId) async {
-    final studentsInBatch = await FirebaseFirestore.instance.collection(K.studentBatchCollection)
+  Future<bool> canDeleteBatch(String batchId) async {
+    final studentsInBatch = await _firestore.collection(K.studentBatchCollection)
         .where(K.batchId, isEqualTo: batchId)
         .get();
      return studentsInBatch.docs.isEmpty;
   }
 
-  static Future<Batch> createNewBatch(String name, bool active, String courseId, String notes, List<String> scheduleDays, TimeOfDay startTime, TimeOfDay endTime, String address) async{
-    String adminId = await AdminHelper.getLoggedAdminUserId();
+  Future<Batch> createNewBatch(String name, bool active, String courseId, String notes, List<String> scheduleDays, TimeOfDay startTime, TimeOfDay endTime, String address, GeoPoint? location) async{
     Batch newBatch = Batch(
-        adminId: adminId,
         name: name,
         studentCount: 0,
         active: active,
@@ -64,22 +66,23 @@ class BatchHelper {
         scheduleDays: scheduleDays,
         startTime: startTime,
         endTime: endTime,
-        address: address);
-    DocumentReference docRef = await FirebaseFirestore.instance.collection(K.batchCollection).add(newBatch.toMap());
+        address: address,
+        location: location);
+    DocumentReference docRef = await _firestore.collection(K.batchCollection).add(newBatch.toMap());
     newBatch.id = docRef.id;
     return newBatch;
   }
 
-  static Future<void> updateBatch(Batch batch) async {
-    final batchDocRef = FirebaseFirestore.instance
+  Future<void> updateBatch(Batch batch) async {
+    final batchDocRef = _firestore
         .collection(K.batchCollection).doc(batch.id);
 
     await batchDocRef.update(batch.toMap());
   }
 
-  static Future<void> updateStudentCount(String batchId, int delta) async {
-    final batchDocRef = FirebaseFirestore.instance.collection(K.batchCollection).doc(batchId);
-    await FirebaseFirestore.instance.runTransaction((transaction) async {
+  Future<void> updateStudentCount(String batchId, int delta) async {
+    final batchDocRef = _firestore.collection(K.batchCollection).doc(batchId);
+    await _firestore.runTransaction((transaction) async {
       final snapshot = await transaction.get(batchDocRef);
       if (snapshot.exists) {
         final currentCount = snapshot[K.studentCount] ?? 0;
@@ -88,15 +91,15 @@ class BatchHelper {
     });
   }
 
-  static Future<void> resetStudentCount(String batchId) async {
-    final studentsSnapshot = await FirebaseFirestore.instance
+  Future<void> resetStudentCount(String batchId) async {
+    final studentsSnapshot = await _firestore
         .collection(K.studentBatchCollection)
         .where(K.batchId, isEqualTo: batchId)
         .get();
 
     final count = studentsSnapshot.docs.length;
 
-    await FirebaseFirestore.instance
+    await _firestore
         .collection(K.batchCollection)
         .doc(batchId)
         .update({'studentCount': count});

@@ -1,14 +1,12 @@
 class Course {
-  final String? courseId; // Nullable because it might not be assigned yet
+  final String? courseId;
   final String name;
   final Category category;
-  final String adminId;
 
   Course({
-    this.courseId, // Nullable, can be omitted when creating a Course
+    this.courseId,
     required this.name,
     required this.category,
-    required this.adminId,
   });
 
   // Factory method to create a Course from Firestore document
@@ -16,7 +14,6 @@ class Course {
     return Course(
       courseId: documentId, // Assign document ID
       name: data['name'] ?? '',
-      adminId: data['adminId'] ?? '',
       category: _categoryFromString(data['category'] ?? 'academics'),
     );
   }
@@ -25,7 +22,6 @@ class Course {
   Map<String, dynamic> toMap() {
     return {
       'name': name,
-      'adminId': adminId,
       'category': _categoryToString(category),
     };
   }
@@ -37,6 +33,10 @@ class Course {
         return 'academics';
       case Category.sports:
         return 'sports';
+      case Category.therapy:
+        return 'therapy';
+      case Category.others:
+        return 'others';
     }
   }
 
@@ -47,6 +47,10 @@ class Course {
         return Category.academics;
       case 'sports':
         return Category.sports;
+      case 'therapy':
+        return Category.therapy;
+      case 'others':
+        return Category.others;
       default:
         return Category.academics;
     }
@@ -56,4 +60,6 @@ class Course {
 enum Category {
   academics,
   sports,
+  therapy,
+  others,
 }

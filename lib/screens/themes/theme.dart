@@ -10,7 +10,7 @@ final ThemeData lightTheme = ThemeData(
   scaffoldBackgroundColor: Colors.white,
   appBarTheme: AppBarTheme(
     backgroundColor: appColor,
-    titleTextStyle: TextStyle(color: Colors.white, fontSize: 20),
+    titleTextStyle: TextStyle(color: Colors.white, fontSize: 18),
     iconTheme: IconThemeData(color: Colors.white),
   ),
   floatingActionButtonTheme: FloatingActionButtonThemeData(

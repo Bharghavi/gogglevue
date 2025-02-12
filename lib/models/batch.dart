@@ -4,7 +4,6 @@ import '../Utils/time_of_day_utils.dart';
 
 class Batch {
   String? id;
-  final String adminId;
   String name;
   int studentCount;
   final String courseId;
@@ -14,11 +13,11 @@ class Batch {
   TimeOfDay startTime;
   TimeOfDay endTime;
   String address;
+  GeoPoint? location;
 
 
   Batch({
     this.id,
-    required this.adminId,
     required this.name,
     required this.studentCount,
     required this.courseId,
@@ -28,12 +27,12 @@ class Batch {
     required this.startTime,
     required this.endTime,
     required this.address,
+    this.location,
   });
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'adminId': adminId,
       'name': name,
       'studentCount': studentCount,
       'courseId': courseId,
@@ -43,6 +42,7 @@ class Batch {
       'startTime': TimeOfDayUtils.timeOfDayToString(startTime),
       'endTime': TimeOfDayUtils.timeOfDayToString(endTime),
       'address': address,
+      'location': location,
     };
   }
 
@@ -51,7 +51,6 @@ class Batch {
     final map = doc.data() as Map<String, dynamic>;
     return Batch(
       id: doc.id,
-      adminId: map['adminId'] ?? '',
       name: map['name'] ?? '',
       studentCount: map['studentCount'] ?? 0,
       courseId: map['courseId']?? '',
@@ -61,6 +60,9 @@ class Batch {
       startTime: TimeOfDayUtils.stringToTimeOfDay(map['startTime']),
       endTime: TimeOfDayUtils.stringToTimeOfDay(map['endTime']),
       address: map['address'],
+      location: map['location'] != null
+          ? map['location'] as GeoPoint
+          : null,
     );
   }
 }

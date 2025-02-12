@@ -4,6 +4,7 @@ import '../../../helpers/payment_helper.dart';
 import '../../../Utils/contact_utils.dart';
 import '../../../helpers/batch_helper.dart';
 import '../../../helpers/student_helper.dart';
+import '../../../managers/database_manager.dart';
 import '../../../models/payment.dart';
 import '../../../models/student.dart';
 import '../payments/add_payments.dart';
@@ -21,9 +22,17 @@ class PendingPaymentsSectionState extends State<PendingPaymentsSection> {
   Map<String, String> batchMap = {};
   bool isLoading = false;
 
+  late BatchHelper batchHelper;
+
   @override
   void initState() {
     super.initState();
+    initialize();
+  }
+
+  Future<void> initialize() async {
+    final firestore = await DatabaseManager.getAdminDatabase();
+    batchHelper = BatchHelper(firestore);
     fetchOverduePayments();
   }
 
@@ -36,7 +45,7 @@ class PendingPaymentsSectionState extends State<PendingPaymentsSection> {
     final studentIds =
         fetchedPayments.map((payment) => payment.studentId).toSet().toList();
     final fetchedStudents = await StudentHelper.fetchStudentsByIds(studentIds);
-    final batches = await BatchHelper.fetchActiveBatches();
+    final batches = await batchHelper.fetchActiveBatches();
 
     setState(() {
       isLoading = false;

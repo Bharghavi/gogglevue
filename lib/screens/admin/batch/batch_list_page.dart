@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../managers/database_manager.dart';
 import 'add_batch_page.dart';
 import '../lesson_plan_page.dart';
 import 'edit_batch_dialog.dart';
@@ -21,11 +22,19 @@ class BatchListPageState extends State<BatchListPage> {
   bool isLoading = false;
   String title = 'Batches';
 
+  late BatchHelper batchHelper;
+
+  Future<void> initialize() async {
+    final firestore = await DatabaseManager.getAdminDatabase();
+    batchHelper = BatchHelper(firestore);
+    fetchBatch();
+    setTitle();
+  }
+
   @override
   void initState() {
     super.initState();
-    fetchBatch();
-    setTitle();
+    initialize();
   }
 
   @override
@@ -61,7 +70,7 @@ class BatchListPageState extends State<BatchListPage> {
       isLoading = true;
     });
     try {
-      final batchList = await BatchHelper.fetchActiveBatches();
+      final batchList = await batchHelper.fetchActiveBatches();
       setState(() {
         batches = batchList;
         isLoading = false;
@@ -180,7 +189,7 @@ class BatchListPageState extends State<BatchListPage> {
   }
 
   void _removeBatch(Batch batch) async {
-    bool canDeleteFromDb = await BatchHelper.canDeleteBatch(batch.id!);
+    bool canDeleteFromDb = await batchHelper.canDeleteBatch(batch.id!);
 
     if (!canDeleteFromDb) {
       UIUtils.showErrorDialog(context, 'Delete batch', 'You cannot delete a batch with active students');
@@ -191,7 +200,7 @@ class BatchListPageState extends State<BatchListPage> {
         title: 'Remove Batch',
         content: 'Are you sure you want to delete this batch?',
         onConfirm: () {
-          BatchHelper.deleteBatch(batch);
+          batchHelper.deleteBatch(batch);
           UIUtils.showMessage(context, 'Batch deleted successfully');
           setState(() {
             batches.remove(batch);
