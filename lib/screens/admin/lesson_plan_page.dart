@@ -1,3 +1,4 @@
+import 'package:Aarambha/managers/database_manager.dart';
 import 'package:flutter/material.dart';
 import '../../Utils/time_of_day_utils.dart';
 import '../../helpers/lesson_plan_helper.dart';
@@ -24,21 +25,27 @@ class LessonPlanPageState extends State<LessonPlanPage> {
   bool isLoading = false;
 
   List<Student> _students = [];
+  late StudentBatchHelper studentBatchHelper;
 
   @override
   void initState() {
     super.initState();
+   initialize();
+  }
+
+  Future<void> initialize() async {
+    final firestore = await DatabaseManager.getAdminDatabase();
+    studentBatchHelper = StudentBatchHelper(firestore);
     _selectedBatch = widget.batch;
     fetchStudents(_selectedBatch!.id!);
   }
-
 
   Future<void> fetchStudents(String batchId) async {
     setState(() {
       isLoading = true;
     });
     try {
-      final students = await StudentBatchHelper.fetchAllStudentsFor(batchId);
+      final students = await studentBatchHelper.fetchAllStudentsFor(batchId);
       setState(() {
         _students = students;
         isLoading = false;

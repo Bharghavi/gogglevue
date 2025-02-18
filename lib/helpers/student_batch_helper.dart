@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'student_helper.dart';
 import '../Utils/time_of_day_utils.dart';
-import 'admin_helper.dart';
 import '../models/batch.dart';
 import '../models/student.dart';
 import '../models/student_batch.dart';
@@ -9,18 +8,20 @@ import '../constants.dart';
 
 class StudentBatchHelper {
 
-  static Future<List<Student>> fetchAllStudentsFor(String batchId) async{
-    final adminId = await AdminHelper.getLoggedAdminUserId();
+  final FirebaseFirestore _firestore;
 
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+  StudentBatchHelper(this._firestore);
+
+  Future<List<Student>> fetchAllStudentsFor(String batchId) async{
+
+    QuerySnapshot querySnapshot = await _firestore
         .collection(K.studentBatchCollection)
         .where(K.active, isEqualTo: true)
-        .where(K.adminId, isEqualTo: adminId)
         .where(K.batchId, isEqualTo: batchId)
         .get();
 
     List<Student> students = await Future.wait(querySnapshot.docs.map((doc) async {
-      DocumentSnapshot studentSnapshot = await FirebaseFirestore.instance
+      DocumentSnapshot studentSnapshot = await _firestore
           .collection(K.studentCollection)
           .doc(doc[K.studentId])
           .get();
@@ -30,21 +31,18 @@ class StudentBatchHelper {
     return students;
   }
 
-  static Future<List<Student>> fetchAllStudentsOn(String batchId, DateTime onDate) async {
-    final adminId = await AdminHelper.getLoggedAdminUserId();
-
+  Future<List<Student>> fetchAllStudentsOn(String batchId, DateTime onDate) async {
     DateTime normalizedDate = TimeOfDayUtils.normalizeDate(onDate);
 
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+    QuerySnapshot querySnapshot = await _firestore
         .collection(K.studentBatchCollection)
         .where(K.active, isEqualTo: true)
-        .where(K.adminId, isEqualTo: adminId)
         .where(K.joiningDate, isLessThanOrEqualTo: normalizedDate)
         .where(K.batchId, isEqualTo: batchId)
         .get();
 
     List<Student> students = await Future.wait(querySnapshot.docs.map((doc) async {
-      DocumentSnapshot studentSnapshot = await FirebaseFirestore.instance
+      DocumentSnapshot studentSnapshot = await _firestore
           .collection(K.studentCollection)
           .doc(doc[K.studentId])
           .get();
@@ -54,20 +52,18 @@ class StudentBatchHelper {
     return students;
   }
 
-  static Future<List<Student>> fetchAllStudentsNotInBatch(String batchId) async {
-
-    final adminId = await AdminHelper.getLoggedAdminUserId();
+  Future<List<Student>> fetchAllStudentsNotInBatch(String batchId) async {
 
     List<Student> studentsInBatch = await fetchAllStudentsFor(batchId);
+    StudentHelper studentHelper = StudentHelper(_firestore);
 
     if (studentsInBatch.isEmpty) {
-      return StudentHelper.fetchAllStudents();
+      return studentHelper.fetchAllStudents();
     }
 
     List<String> studentIdsInBatch = studentsInBatch.map((student) => student.id!).toList();
 
-    Query query = FirebaseFirestore.instance.collection(K.studentCollection)
-                  .where(K.adminId, isEqualTo: adminId);
+    Query query = _firestore.collection(K.studentCollection);
 
     if (studentIdsInBatch.isNotEmpty) {
       query = query.where(FieldPath.documentId, whereNotIn: studentIdsInBatch);
@@ -78,8 +74,8 @@ class StudentBatchHelper {
     return querySnapshot.docs.map((doc) => Student.fromFirestore(doc)).toList();
   }
 
-  static Future<void> deleteStudentFromBatch(String studentId, String batchId) async {
-    final querySnapshot = await FirebaseFirestore.instance
+  Future<void> deleteStudentFromBatch(String studentId, String batchId) async {
+    final querySnapshot = await _firestore
         .collection(K.studentBatchCollection)
         .where(K.batchId, isEqualTo: batchId)
         .where(K.studentId, isEqualTo: studentId)
@@ -90,23 +86,20 @@ class StudentBatchHelper {
     }
   }
 
-  static Future<StudentBatch> addStudentToBatch(String studentId, String batchId, DateTime joiningDate) async{
-
-    final adminId = await AdminHelper.getLoggedAdminUserId();
+  Future<StudentBatch> addStudentToBatch(String studentId, String batchId, DateTime joiningDate) async{
 
     StudentBatch newStudent = StudentBatch(
       studentId: studentId,
       batchId: batchId,
-      adminId: adminId,
       joiningDate: joiningDate,
       active: true
     );
-    await FirebaseFirestore.instance.collection(K.studentBatchCollection).add(newStudent.toMap());
+    await _firestore.collection(K.studentBatchCollection).add(newStudent.toMap());
     return newStudent;
   }
 
-  static Future<List<Batch>> getBatchesForStudent(String studentId) async {
-    final querySnapshot = await FirebaseFirestore.instance
+   Future<List<Batch>> getBatchesForStudent(String studentId) async {
+    final querySnapshot = await _firestore
         .collection(K.studentBatchCollection)
         .where(K.studentId, isEqualTo: studentId)
         .get();
@@ -116,7 +109,7 @@ class StudentBatchHelper {
     }
 
     List<Batch> result = await Future.wait(querySnapshot.docs.map((doc) async {
-      DocumentSnapshot batchSnapshot = await FirebaseFirestore.instance
+      DocumentSnapshot batchSnapshot = await _firestore
           .collection(K.batchCollection)
           .doc(doc[K.batchId])
           .get();
@@ -126,8 +119,8 @@ class StudentBatchHelper {
     return result;
   }
 
-  static Future<DateTime> getStudentJoiningDate(String studentId, String batchId) async {
-    final querySnapshot = await FirebaseFirestore.instance
+  Future<DateTime> getStudentJoiningDate(String studentId, String batchId) async {
+    final querySnapshot = await _firestore
         .collection(K.studentBatchCollection)
         .where(K.studentId, isEqualTo: studentId)
         .where(K.batchId, isEqualTo: batchId)

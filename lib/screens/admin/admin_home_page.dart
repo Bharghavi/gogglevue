@@ -26,7 +26,6 @@ class HomepageState extends State<HomePage> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Upcoming Sessions section
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -36,8 +35,7 @@ class HomepageState extends State<HomePage> {
                   ],
                 ),
               ),
-              const SizedBox(width: 16.0), // Spacing between the two sections
-              // Pending Payments section
+              const SizedBox(width: 16.0),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

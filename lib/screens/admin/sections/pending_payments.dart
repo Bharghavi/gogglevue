@@ -23,6 +23,7 @@ class PendingPaymentsSectionState extends State<PendingPaymentsSection> {
   bool isLoading = false;
 
   late BatchHelper batchHelper;
+  late StudentHelper studentHelper;
 
   @override
   void initState() {
@@ -33,6 +34,7 @@ class PendingPaymentsSectionState extends State<PendingPaymentsSection> {
   Future<void> initialize() async {
     final firestore = await DatabaseManager.getAdminDatabase();
     batchHelper = BatchHelper(firestore);
+    studentHelper = StudentHelper(firestore);
     fetchOverduePayments();
   }
 
@@ -44,7 +46,7 @@ class PendingPaymentsSectionState extends State<PendingPaymentsSection> {
     final fetchedPayments = await PaymentHelper.getPaymentOverdue();
     final studentIds =
         fetchedPayments.map((payment) => payment.studentId).toSet().toList();
-    final fetchedStudents = await StudentHelper.fetchStudentsByIds(studentIds);
+    final fetchedStudents = await studentHelper.fetchStudentsByIds(studentIds);
     final batches = await batchHelper.fetchActiveBatches();
 
     setState(() {

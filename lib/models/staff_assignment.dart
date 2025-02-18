@@ -5,12 +5,10 @@ class StaffAssignment {
   DateTime startDate;
   DateTime? endDate;
   String staffId;
-  String adminId;
 
   StaffAssignment({
     required this.staffId,
     required this.batchId,
-    required this.adminId,
     required this.startDate,
     this.endDate,
   });
@@ -19,7 +17,6 @@ class StaffAssignment {
     return {
       'staffId': staffId,
       'batchId': batchId,
-      'adminId': adminId,
       'startDate': Timestamp.fromDate(startDate),
       'endDate': endDate != null ? Timestamp.fromDate(endDate!) : null,
     };

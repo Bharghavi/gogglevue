@@ -13,6 +13,8 @@ class Batch {
   TimeOfDay startTime;
   TimeOfDay endTime;
   String address;
+  DateTime startDate;
+  DateTime? endDate;
   GeoPoint? location;
 
 
@@ -27,6 +29,8 @@ class Batch {
     required this.startTime,
     required this.endTime,
     required this.address,
+    required this.startDate,
+    DateTime? endDate,
     this.location,
   });
 
@@ -41,6 +45,8 @@ class Batch {
       'scheduleDays': scheduleDays,
       'startTime': TimeOfDayUtils.timeOfDayToString(startTime),
       'endTime': TimeOfDayUtils.timeOfDayToString(endTime),
+      'startDate' : startDate,
+      'endDate' : endDate,
       'address': address,
       'location': location,
     };
@@ -60,6 +66,8 @@ class Batch {
       startTime: TimeOfDayUtils.stringToTimeOfDay(map['startTime']),
       endTime: TimeOfDayUtils.stringToTimeOfDay(map['endTime']),
       address: map['address'],
+      startDate: (map['startDate'] as Timestamp).toDate(),
+      endDate: map['endDate'] == null ? null : (map['endDate'] as Timestamp).toDate(),
       location: map['location'] != null
           ? map['location'] as GeoPoint
           : null,

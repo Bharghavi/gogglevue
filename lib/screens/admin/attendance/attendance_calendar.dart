@@ -1,3 +1,4 @@
+import '/managers/database_manager.dart';
 import 'package:flutter/material.dart';
 import '../../../helpers/student_batch_helper.dart';
 import '../../../Utils/time_of_day_utils.dart';
@@ -25,9 +26,17 @@ class AttendanceCalendarState extends State<AttendanceCalendar> {
   DateTime? focusedMonth;
   DateTime? firstDate;
 
+  late StudentBatchHelper studentBatchHelper;
+
   @override
   void initState() {
     super.initState();
+    initialize();
+  }
+
+  Future<void> initialize() async {
+    final firestore = await DatabaseManager.getAdminDatabase();
+    studentBatchHelper = StudentBatchHelper(firestore);
     presentDays = [];
     cancelledDays = [];
     absentDays = [];
@@ -46,7 +55,7 @@ class AttendanceCalendarState extends State<AttendanceCalendar> {
       lastDayOfMonth,
     );
 
-    final studentJoiningDate = await StudentBatchHelper.getStudentJoiningDate(
+    final studentJoiningDate = await studentBatchHelper.getStudentJoiningDate(
         widget.studentId, widget.batchId);
 
     setState(() {

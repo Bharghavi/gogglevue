@@ -5,14 +5,13 @@ import '../constants.dart';
 
 class StudentHelper {
 
-  static Future<List<Student>> fetchAllStudents() async{
+  final FirebaseFirestore _firestore;
 
-    String adminId = await AdminHelper.getLoggedAdminUserId();
+  StudentHelper(this._firestore);
 
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection(K.studentCollection)
-        .where(K.adminId, isEqualTo: adminId)
-        .get();
+  Future<List<Student>> fetchAllStudents() async{
+
+    QuerySnapshot querySnapshot = await _firestore.collection(K.studentCollection).get();
 
     List<Student> students = [];
 
@@ -25,14 +24,14 @@ class StudentHelper {
     return students;
   }
 
-  static Future<void> deleteStudent(Student student) async {
-    final studentDocRef = FirebaseFirestore.instance.collection(K.studentCollection).doc(student.id);
-    studentDocRef.delete();
+  Future<void> deleteStudent(Student student) async {
+    final studentDocRef = _firestore.collection(K.studentCollection).doc(student.id);
+    await studentDocRef.delete();
   }
 
-  static Future<Map<String, Student>> fetchStudentsByIds(List<String> studentIds) async {
+  Future<Map<String, Student>> fetchStudentsByIds(List<String> studentIds) async {
     if (studentIds.isEmpty) return {};
-    final snapshot = await FirebaseFirestore.instance
+    final snapshot = await _firestore
         .collection(K.studentCollection)
         .where(FieldPath.documentId, whereIn: studentIds)
         .get();
@@ -42,23 +41,30 @@ class StudentHelper {
     };
   }
 
-  static Future<Student> saveNewStudent(String name, String email, String phone, String address, DateTime dob) async{
-    String adminId = await AdminHelper.getLoggedAdminUserId();
+  Future<Student> saveNewStudent(String name, String? email, String phone, String? address, DateTime? dob, String? profilePic) async{
+   QuerySnapshot querySnapshot = await _firestore.collection(K.studentCollection)
+    .where('name', isEqualTo: name)
+    .where('phone', isEqualTo: phone)
+    .get();
+
+   if (querySnapshot.docs.isNotEmpty) {
+     throw Exception('Student with name $name and phone $phone already exist');
+   }
     Student newStudent = Student(
-        adminId: adminId,
         name: name,
         dob: dob,
         email: email,
         phone: phone,
         address: address,
+        profilePic: profilePic,
        );
-    await FirebaseFirestore.instance.collection(K.studentCollection).add(newStudent.toMap());
+    await _firestore.collection(K.studentCollection).add(newStudent.toMap());
     return newStudent;
   }
 
-  static Future<Student?> getStudentForId(String studentId) async{
+  Future<Student?> getStudentForId(String studentId) async{
 
-    final docSnapshot = await FirebaseFirestore.instance
+    final docSnapshot = await _firestore
         .collection(K.studentCollection)
         .doc(studentId).get();
 

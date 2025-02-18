@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'admin_helper.dart';
 import '../models/course.dart';
 import '../constants.dart';
 
@@ -40,7 +39,8 @@ class CourseHelper {
 
   Future<Course> addNewCourse(String courseName, Category category) async{
     Course newCourse = Course(name: courseName, category: category);
-    await _firestore.collection(K.courseCollection).add(newCourse.toMap());
+    DocumentReference docRef = await _firestore.collection(K.courseCollection).add(newCourse.toMap());
+    newCourse = Course(courseId: docRef.id, name: courseName, category: category);
     return newCourse;
   }
 }

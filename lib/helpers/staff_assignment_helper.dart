@@ -1,26 +1,26 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../Utils/time_of_day_utils.dart';
-import '../models/staffAssignment.dart';
-
+import '../models/staff_assignment.dart';
 import '../constants.dart';
 import '../models/staff.dart';
-import 'admin_helper.dart';
 
 class StaffAssignmentHelper {
 
-  static Future<void> assignStaff(String batchId, String staffId, DateTime startDate, DateTime? endDate) async {
-    final adminId = await AdminHelper.getLoggedAdminUserId();
+  final FirebaseFirestore _firestore;
 
+  StaffAssignmentHelper(this._firestore);
+
+  Future<void> assignStaff(String batchId, String staffId, DateTime startDate, DateTime? endDate) async {
     DateTime normalizedStartDate = TimeOfDayUtils.normalizeDate(startDate);
+
     DateTime? normalizedEndDate = endDate != null
         ? TimeOfDayUtils.normalizeDate(endDate)
         : null;
 
-     QuerySnapshot existingAssignmentsSnapshot = await FirebaseFirestore.instance
+     QuerySnapshot existingAssignmentsSnapshot = await _firestore
         .collection(K.staffAssignmentCollection)
         .where(K.batchId, isEqualTo: batchId)
         .where(K.staffId, isEqualTo: staffId)
-         .where(K.adminId, isEqualTo: adminId)
         .where(K.startDate, isLessThanOrEqualTo: Timestamp.fromDate(normalizedStartDate))
         .get();
 
@@ -34,7 +34,7 @@ class StaffAssignmentHelper {
       if (endDate == null) {
         DateTime updatedEndDate = normalizedStartDate.subtract(Duration(days: 1));
 
-        await FirebaseFirestore.instance
+        await _firestore
             .collection(K.staffAssignmentCollection)
             .doc(doc.id)
             .update({K.endDate: Timestamp.fromDate(updatedEndDate)});
@@ -45,27 +45,22 @@ class StaffAssignmentHelper {
     StaffAssignment newStaff = StaffAssignment(
       staffId: staffId,
       batchId: batchId,
-      adminId: adminId,
       startDate: normalizedStartDate,
       endDate: normalizedEndDate,
     );
 
-    print('end date - ${newStaff.endDate}');
-
-    await FirebaseFirestore.instance
+    await _firestore
         .collection(K.staffAssignmentCollection)
         .add(newStaff.toMap());
   }
 
-  static Future<Staff?> getStaffFor(String batchId, DateTime date) async {
+  Future<Staff?> getStaffFor(String batchId, DateTime date) async {
 
     DateTime normalizedDate = TimeOfDayUtils.normalizeDate(date);
-    final adminId = await AdminHelper.getLoggedAdminUserId();
 
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+    QuerySnapshot querySnapshot = await _firestore
         .collection(K.staffAssignmentCollection)
         .where(K.batchId, isEqualTo: batchId)
-        .where(K.adminId, isEqualTo: adminId)
         .where(K.startDate, isLessThanOrEqualTo: Timestamp.fromDate(normalizedDate))
         .get();
 
@@ -77,7 +72,7 @@ class StaffAssignmentHelper {
           : null;
 
       if (endDate == null || endDate.isAfter(date) || endDate.isAtSameMomentAs(date)) {
-        final staffDoc = await FirebaseFirestore.instance.collection(K.staffCollection).doc(data[K.staffId]).get();
+        final staffDoc = await _firestore.collection(K.staffCollection).doc(data[K.staffId]).get();
         if (staffDoc.exists) {
           return Staff
               .fromFirestore(staffDoc.data() as Map<String, dynamic>, staffDoc.id);
@@ -87,13 +82,11 @@ class StaffAssignmentHelper {
     return null;
   }
 
-  static Future<DateTime> getFirstDateForBatch(String batchId) async{
-    final adminId = await AdminHelper.getLoggedAdminUserId();
+  Future<DateTime> getFirstDateForBatch(String batchId) async{
 
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+    QuerySnapshot querySnapshot = await _firestore
         .collection(K.staffAssignmentCollection)
         .where(K.batchId, isEqualTo: batchId)
-        .where(K.adminId, isEqualTo: adminId)
         .orderBy(K.startDate)
         .get();
 

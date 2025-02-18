@@ -5,14 +5,12 @@ class StudentBatch {
 
   final String studentId;
   final String batchId;
-  final String adminId;
   final DateTime joiningDate;
   bool active;
 
   StudentBatch({
     required this.studentId,
     required this.batchId,
-    required this.adminId,
     required this.joiningDate,
     required this.active,
   });
@@ -21,7 +19,6 @@ class StudentBatch {
     return {
       'studentId': studentId,
       'batchId': batchId,
-      'adminId': adminId,
       'joiningDate': Timestamp.fromDate(joiningDate),
       'active': active,
     };

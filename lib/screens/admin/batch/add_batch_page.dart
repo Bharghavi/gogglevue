@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:place_picker_google/place_picker_google.dart';
 
 import '../../../Utils/location_utils.dart';
@@ -34,6 +35,7 @@ class AddBatchPageState extends State<AddBatchPage> {
 
   String? selectedInstructorId;
   String? selectedCourseId;
+  Staff? selectedInstructor;
   List<String> instructors = [];
   List<String> courses = [];
   List<Course> fetchedCourses = [];
@@ -44,6 +46,8 @@ class AddBatchPageState extends State<AddBatchPage> {
 
   late BatchHelper batchHelper;
   late CourseHelper courseHelper;
+  late StaffHelper staffHelper;
+  late StaffAssignmentHelper staffAssignmentHelper;
 
   @override
   void initState() {
@@ -55,6 +59,8 @@ class AddBatchPageState extends State<AddBatchPage> {
     final firestore = await DatabaseManager.getAdminDatabase();
     batchHelper = BatchHelper(firestore);
     courseHelper = CourseHelper(firestore);
+    staffHelper = StaffHelper(firestore);
+    staffAssignmentHelper = StaffAssignmentHelper(firestore);
     fetchCourses();
     fetchInstructors();
   }
@@ -75,7 +81,7 @@ class AddBatchPageState extends State<AddBatchPage> {
 
   Future<void> fetchInstructors() async {
     try {
-      fetchedInstructors = await StaffHelper.getAllStaff();
+      fetchedInstructors = await staffHelper.getAllStaff();
       setState(() {
         instructors = fetchedInstructors.map((staff) => staff.name).toList();
       });
@@ -117,25 +123,30 @@ class AddBatchPageState extends State<AddBatchPage> {
 
   void _saveBatch() async {
     if (_batchNameController.text.isEmpty) {
-      UIUtils.showMessage(context, 'Batch name is required');
+      UIUtils.showErrorDialog(context,'Error', 'Batch name is required');
       return;
     }
     if (selectedCourseId == null) {
-      UIUtils.showMessage(context, 'Please select a course.');
+      UIUtils.showErrorDialog(context,'Error',  'Please select a course.');
       return;
     }
-    if (selectedInstructorId == null) {
-      UIUtils.showMessage(context, 'Please select an instructor.');
+    if (selectedInstructorId == null && selectedInstructor == null) {
+      UIUtils.showErrorDialog(context,'Error',  'Please select an instructor.');
       return;
     }
     if (selectedDays.isEmpty) {
-      UIUtils.showMessage(context, 'Please select a schedule.');
+      UIUtils.showErrorDialog(context,'Error', 'Please select a schedule.');
       return;
     }
 
     if(_startTimeController.text.isEmpty ||
         _endTimeController.text.isEmpty) {
-      UIUtils.showMessage(context, 'Please select start and end time for the batch');
+      UIUtils.showErrorDialog(context,'Error', 'Please select start and end time for the batch');
+      return;
+    }
+    if (_startDate.isBefore(selectedInstructor!.joiningDate)) {
+      UIUtils.showErrorDialog(context, 'Error',
+          'Batch start date cannot be before staff joining date ${TimeOfDayUtils.dateTimeToString(selectedInstructor!.joiningDate)}');
       return;
     }
 
@@ -143,11 +154,11 @@ class AddBatchPageState extends State<AddBatchPage> {
     final endDateTime = DateTime(0, 1, 1, endTime!.hour, endTime!.minute);
 
     if (endDateTime.isBefore(startDateTime) || endDateTime.isAtSameMomentAs(startDateTime)) {
-      UIUtils.showMessage(context, 'End time must be after start time.');
+      UIUtils.showErrorDialog(context, 'Error', 'End time must be after start time.');
       return;
     }
     if (_fromDateController.text.isEmpty) {
-      UIUtils.showMessage(context, 'Please enter start date');
+      UIUtils.showErrorDialog(context, 'Error', 'Please enter start date');
       return;
     }
 
@@ -161,19 +172,20 @@ class AddBatchPageState extends State<AddBatchPage> {
           startTime!,
           endTime!,
           _addressController.text,
+          _startDate,
+          null,
           location);
 
-      await StaffAssignmentHelper.assignStaff(newBatch.id!, selectedInstructorId!, _startDate, null);
+      await staffAssignmentHelper.assignStaff(newBatch.id!, selectedInstructorId!, _startDate, null);
 
       if (mounted) {
         UIUtils.showMessage(context, 'Batch saved successfully');
         Navigator.pop(context, newBatch);
       }
-    } catch (e, stack) {
-      print(e);
-      print(stack);
+    } catch (e) {
       if (mounted) {
         UIUtils.showErrorDialog(context, 'Error saving batch', '$e');
+        debugPrint('$e');
       }
     }
 
@@ -297,21 +309,24 @@ class AddBatchPageState extends State<AddBatchPage> {
               SizedBox(height: 8),
 
               // Instructor Dropdown
-              DropdownButtonFormField<String>(
-                value: selectedInstructorId,
+              DropdownButtonFormField<Staff>(
+                value: selectedInstructor,
                 decoration: InputDecoration(
                   labelText: 'Select Coach/Instructor',
                   border: OutlineInputBorder(),
                 ),
                 items: fetchedInstructors.map((staff) {
                   return DropdownMenuItem(
-                    value: staff.id,
+                    value: staff,
                     child: Text(staff.name),
                   );
                 }).toList(),
                 onChanged: (value) {
                   setState(() {
-                    selectedInstructorId = value;
+                    if (value != null) {
+                      selectedInstructorId = value.id;
+                      selectedInstructor = value;
+                    }
                   });
                 },
               ),
@@ -361,17 +376,19 @@ class AddBatchPageState extends State<AddBatchPage> {
   }
 
   Future<void> _getLocation() async {
+
     LocationResult? locationResult = await LocationUtils.pickLocation(
-      context,
-      _locationController.text,
-    );
+      context, location);
 
     if (locationResult == null) {
       return;
     }
 
     if (locationResult.formattedAddress != null &&
-        locationResult.latLng != null) {
+        locationResult.latLng != null)  {
+      if (!mounted) {
+        return;
+      }
       setState(() {
         _addressController.text = locationResult.formattedAddress!;
         location = GeoPoint(

@@ -1,3 +1,4 @@
+import 'package:Aarambha/managers/database_manager.dart';
 import 'package:flutter/material.dart';
 import '../batch/batch_details_card.dart';
 import '../../../helpers/staff_assignment_helper.dart';
@@ -36,10 +37,22 @@ class StudentAttendancePageState extends State<StudentAttendancePage> {
   Batch? batch;
   String staffName = '';
 
+  late StaffHelper staffHelper;
+  late StudentBatchHelper studentBatchHelper;
+  late StaffAssignmentHelper staffAssignmentHelper;
+
   @override
   void initState() {
     super.initState();
+    initialize();
+  }
+
+  Future<void> initialize() async {
     batch = widget.batch;
+    final firestore = await DatabaseManager.getAdminDatabase();
+    staffHelper = StaffHelper(firestore);
+    studentBatchHelper = StudentBatchHelper(firestore);
+    staffAssignmentHelper = StaffAssignmentHelper(firestore);
     fetchAndSetAttendance(selectedDate);
     fetchStudentsForBatch(selectedDate);
   }
@@ -50,9 +63,9 @@ class StudentAttendancePageState extends State<StudentAttendancePage> {
         isLoading = true;
       });
       final studentList =
-          await StudentBatchHelper.fetchAllStudentsOn(batch!.id!, date);
-      final staff = await StaffAssignmentHelper.getStaffFor(widget.batch.id!, date);
-      final List<Staff> list = await StaffHelper.getAllStaff();
+          await studentBatchHelper.fetchAllStudentsOn(batch!.id!, date);
+      final staff = await staffAssignmentHelper.getStaffFor(widget.batch.id!, date);
+      final List<Staff> list = await staffHelper.getAllStaff();
       setState(() {
         studentsInBatch = [];
         studentsInBatch.addAll(studentList);
@@ -79,7 +92,7 @@ class StudentAttendancePageState extends State<StudentAttendancePage> {
     final fetchedAttendance =
     await AttendanceHelper.fetchAttendanceForBatch(
         batch!.id!, date);
-    final startDate = await  StaffAssignmentHelper.getFirstDateForBatch(batch!.id!);
+    final startDate = await staffAssignmentHelper.getFirstDateForBatch(batch!.id!);
     setState(() {
       selectedDate = date;
       attendance = fetchedAttendance;

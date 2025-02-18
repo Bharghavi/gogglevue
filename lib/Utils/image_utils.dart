@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ImageUtils {
@@ -7,7 +8,7 @@ class ImageUtils {
   static Future<String?> uploadImage(File imageFile, String adminId,
       String imageType) async {
     try {
-      String fileName = "$adminId/$imageType.jpg"; // Store as "adminId/logo.jpg" or "adminId/profilePic.jpg"
+      String fileName = "$adminId/$imageType.jpg";
       Reference ref = FirebaseStorage.instance.ref().child(fileName);
       UploadTask uploadTask = ref.putFile(imageFile);
 
@@ -29,5 +30,26 @@ class ImageUtils {
     } else {
       return null;
     }
+  }
+
+  static ClipRRect getClipRRectImage (String picUrl) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(25),
+      child: Image.network(
+        picUrl,
+        width: 50,
+        height: 50,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return const SizedBox(
+            width: 50,
+            height: 50,
+            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, size: 50),
+      ),
+    );
   }
 }

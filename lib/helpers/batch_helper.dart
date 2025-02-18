@@ -12,11 +12,8 @@ class BatchHelper {
 
   Future<List<Batch>> fetchActiveBatches() async{
 
-    String adminId = await AdminHelper.getLoggedAdminUserId();
-
     QuerySnapshot querySnapshot = await _firestore
         .collection(K.batchCollection)
-        .where(K.adminId, isEqualTo: adminId)
         .where(K.active, isEqualTo: true)
         .get();
 
@@ -56,7 +53,7 @@ class BatchHelper {
      return studentsInBatch.docs.isEmpty;
   }
 
-  Future<Batch> createNewBatch(String name, bool active, String courseId, String notes, List<String> scheduleDays, TimeOfDay startTime, TimeOfDay endTime, String address, GeoPoint? location) async{
+  Future<Batch> createNewBatch(String name, bool active, String courseId, String notes, List<String> scheduleDays, TimeOfDay startTime, TimeOfDay endTime, String address,DateTime startDate, DateTime? endDate, GeoPoint? location) async{
     Batch newBatch = Batch(
         name: name,
         studentCount: 0,
@@ -67,6 +64,8 @@ class BatchHelper {
         startTime: startTime,
         endTime: endTime,
         address: address,
+        startDate: startDate,
+        endDate: endDate,
         location: location);
     DocumentReference docRef = await _firestore.collection(K.batchCollection).add(newBatch.toMap());
     newBatch.id = docRef.id;

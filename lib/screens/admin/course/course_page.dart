@@ -34,7 +34,9 @@ class CoursePageState extends State<CoursePage> {
 
   // Method to fetch courses asynchronously
   Future<void> fetchCourses() async {
-    isLoading = true;
+    setState(() {
+      isLoading = true;
+    });
     final fetchedCourses = await courseHelper.getAllCoursesOffered();
     setState(() {
       courses = fetchedCourses;
@@ -63,7 +65,7 @@ class CoursePageState extends State<CoursePage> {
       }
     } catch (e) {
       if (mounted) {
-        UIUtils.showMessage(context, 'Error occurred: $e');
+        UIUtils.showErrorDialog(context, 'Error occurred', '$e');
       }
     }
   }

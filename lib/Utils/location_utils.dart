@@ -1,5 +1,8 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import 'ui_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -10,32 +13,19 @@ import '../constants.dart';
 
 class LocationUtils {
 
-  static Future<LocationResult?> pickLocation(BuildContext context, String location) async {
+  static Future<LocationResult?> pickLocation(BuildContext context, GeoPoint? initialGeoPoint) async {
     bool hasPermission = await requestLocationPermission(context);
 
     if (!hasPermission) {
       return null;
     }
 
-    LatLng initialLocation;
+    LatLng? initialLocation;
 
-    if (location.isNotEmpty) {
-      try {
-        List<String> latLng = location.split(',');
-        double lat = double.parse(latLng[0].trim());
-        double lng = double.parse(latLng[1].trim());
-        initialLocation = LatLng(lat, lng);
-      } catch (e) {
-        print("Invalid location format: $e");
-        initialLocation = await _getCurrentLocation();
-      }
-    } else {
-      initialLocation = await _getCurrentLocation();
+    if (initialGeoPoint != null) {
+      initialLocation = LatLng(initialGeoPoint.latitude, initialGeoPoint.longitude);
     }
-
-    if (context.mounted) {
-      Navigator.popUntil(context, (route) => route.isFirst);
-    }
+    initialLocation ??= await _getCurrentLocation();
 
     Completer<LocationResult?> completer = Completer<LocationResult?>();
 
@@ -101,6 +91,18 @@ class LocationUtils {
     } catch (e) {
       print("Error getting current location: $e");
       return const LatLng(37.7749, -122.4194); // Default to San Francisco
+    }
+  }
+
+  static void openGoogleMaps(GeoPoint location) async {
+    final double latitude = location.latitude;
+    final double longitude = location.longitude;
+    final String googleMapsUrl = "https://www.google.com/maps/search/?api=1&query=$latitude,$longitude";
+
+    if (await canLaunchUrl(Uri.parse(googleMapsUrl))) {
+      await launchUrl(Uri.parse(googleMapsUrl), mode: LaunchMode.externalApplication);
+    } else {
+      debugPrint("Could not open Google Maps");
     }
   }
 }

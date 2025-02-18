@@ -1,3 +1,4 @@
+import '/managers/database_manager.dart';
 import 'package:flutter/material.dart';
 import '../../../helpers/upcoming_sessions_helper.dart';
 import '../../../Utils/time_of_day_utils.dart';
@@ -16,10 +17,17 @@ class UpcomingSessionsSectionState extends State<UpcomingSessionsSection> {
   List<Batch> today = [];
   List<Batch> tomorrow = [];
   bool isLoading = false;
+  late UpcomingSessionsHelper upcomingSessionsHelper;
 
   @override
   void initState() {
     super.initState();
+    initialize();
+  }
+
+  Future<void> initialize() async {
+    final firestore = await DatabaseManager.getAdminDatabase();
+    upcomingSessionsHelper = UpcomingSessionsHelper(firestore);
     fetchUpcomingSessions();
   }
 
@@ -28,7 +36,7 @@ class UpcomingSessionsSectionState extends State<UpcomingSessionsSection> {
       isLoading = true;
     });
     try {
-      final upcomingBatches = await UpcomingSessionsHelper.getUpcomingBatches();
+      final upcomingBatches = await upcomingSessionsHelper.getUpcomingBatches();
       setState(() {
         today = upcomingBatches[0]!;
         tomorrow = upcomingBatches[1]!;

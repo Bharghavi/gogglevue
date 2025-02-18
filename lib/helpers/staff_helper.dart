@@ -1,19 +1,17 @@
+import 'package:Aarambha/Utils/time_of_day_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'admin_helper.dart';
 import '../models/staff.dart';
 import '../constants.dart';
 
 class StaffHelper {
 
-  static Future<List<Staff>> getAllStaff() async{
+  final FirebaseFirestore _firestore;
 
-    String adminId = await AdminHelper.getLoggedAdminUserId();
+  StaffHelper(this._firestore);
 
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection(K.staffCollection)
-        .where(K.adminId, isEqualTo: adminId)
-        .get();
+  Future<List<Staff>> getAllStaff() async{
 
+    QuerySnapshot querySnapshot = await _firestore.collection(K.staffCollection).get();
     List<Staff> staffList = [];
 
     if (querySnapshot.docs.isNotEmpty) {
@@ -25,15 +23,37 @@ class StaffHelper {
     return staffList;
   }
 
-  static Future<Staff> addNewStaff(String name, String email, String phone, String address, DateTime dob) async{
-    String adminId = await AdminHelper.getLoggedAdminUserId();
-    Staff newStaff = Staff(name: name, email: email, phone: phone, address: address, dob: dob, adminId: adminId);
-    await FirebaseFirestore.instance.collection(K.staffCollection).add(newStaff.toMap());
+  Future<Staff> addNewStaff(String name, String? email, String phone, String? address, DateTime? dob, DateTime joiningDate, double salary) async{
+    QuerySnapshot qs = await _firestore.collection(K.staffCollection).where('phone', isEqualTo: phone).get();
+    if (qs.docs.isNotEmpty) {
+      throw Exception('Staff with phone number $phone already exist');
+    }
+
+    DateTime normalizedDate = TimeOfDayUtils.normalizeDate(joiningDate);
+
+    Staff newStaff = Staff(name: name,
+                          email: email,
+                          phone: phone,
+                          address: address,
+                          dob: dob,
+                          joiningDate: normalizedDate,
+                          monthlyPayment: salary);
+
+    await _firestore.collection(K.staffCollection).add(newStaff.toMap());
     return newStaff;
   }
 
-  static Future<void> deleteStaff(Staff staff) async {
-    final staffDocRef = FirebaseFirestore.instance.collection(K.staffCollection).doc(staff.id);
-    staffDocRef.delete();
+  Future<void> deleteStaff(Staff staff) async {
+    final staffDocRef = _firestore.collection(K.staffCollection).doc(staff.id);
+    await staffDocRef.delete();
+  }
+
+  Future<Staff?> getStaffForId(String staffId) async{
+    final staffDocRef = _firestore.collection(K.staffCollection).doc(staffId);
+    final staffSnapshot = await staffDocRef.get();
+    if (staffSnapshot.exists) {
+      return Staff.fromFirestore(staffSnapshot.data() as Map<String, dynamic>, staffId);
+    }
+    return null;
   }
 }

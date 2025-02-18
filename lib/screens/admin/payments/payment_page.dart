@@ -31,6 +31,7 @@ class PaymentPageState extends State<PaymentPage> {
   bool isLoading = true;
 
   late BatchHelper batchHelper;
+  late StudentHelper studentHelper;
 
   @override
   void initState() {
@@ -41,6 +42,7 @@ class PaymentPageState extends State<PaymentPage> {
   Future<void> initialize() async {
     final firestore = await DatabaseManager.getAdminDatabase();
     batchHelper = BatchHelper(firestore);
+    studentHelper = StudentHelper(firestore);
     fetchStudents();
     fetchPayments();
   }
@@ -51,7 +53,7 @@ class PaymentPageState extends State<PaymentPage> {
       setState(() {
         isLoading = true;
       });
-      final fetchedStudents = await StudentHelper.fetchAllStudents();
+      final fetchedStudents = await studentHelper.fetchAllStudents();
       final batches = await batchHelper.fetchActiveBatches();
       setState(() {
         students = fetchedStudents;

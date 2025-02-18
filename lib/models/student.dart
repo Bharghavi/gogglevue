@@ -3,28 +3,28 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Student {
   String? id;
-  final String name;
-  final DateTime dob;
-  final String address;
-  final String phone;
-  final String email;
-  final String adminId;
+  String name;
+  DateTime? dob;
+  String? address;
+  String phone;
+  String? email;
+  String? profilePic;
 
   Student({
     this.id,
     required this.name,
-    required this.dob,
-    required this.email,
+    this.dob,
+    this.email,
     required this.phone,
-    required this.address,
-    required this.adminId,
+    this.address,
+    this.profilePic,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'adminId': adminId,
+      'profilePic': profilePic,
       'name': name,
-      'dob': Timestamp.fromDate(dob),
+      'dob': dob == null ? null : Timestamp.fromDate(dob!),
       'address': address,
       'phone' : phone,
       'email': email,
@@ -35,11 +35,11 @@ class Student {
     final map = doc.data() as Map<String, dynamic>;
     return Student(
       id: doc.id,
-      adminId: map['adminId'] ?? '',
+      profilePic: map['profilePic'],
       name: map['name'] ?? '',
-      dob: (map['dob'] as Timestamp).toDate(),
-      address: map['address']?? '',
-      email: map['email'] ?? '',
+      dob: map['dob'] == null ? null : (map['dob'] as Timestamp).toDate(),
+      address: map['address'],
+      email: map['email'],
       phone: map['phone'] ?? '',
     );
   }

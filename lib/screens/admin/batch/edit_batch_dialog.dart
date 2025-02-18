@@ -1,4 +1,10 @@
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+import '/Utils/ui_utils.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:place_picker_google/place_picker_google.dart';
+import '../../../Utils/location_utils.dart';
 import '../../../helpers/staff_helper.dart';
 import '../../../helpers/staff_assignment_helper.dart';
 
@@ -27,9 +33,14 @@ class EditBatchDialogState extends State<EditBatchDialog> {
   TimeOfDay endTime = TimeOfDay.now();
 
   String? selectedInstructorId;
+  Staff? selectedInstructor;
+  GeoPoint? location;
   DateTime _startDate = DateTime.now();
   List<Staff> fetchedInstructors = [];
+
   late BatchHelper batchHelper;
+  late StaffHelper staffHelper;
+  late StaffAssignmentHelper staffAssignmentHelper;
 
   @override
   void initState() {
@@ -40,18 +51,22 @@ class EditBatchDialogState extends State<EditBatchDialog> {
   Future<void> initialize() async {
     final firestore = await DatabaseManager.getAdminDatabase();
     batchHelper = BatchHelper(firestore);
-    final currentStaff = await StaffAssignmentHelper.getStaffFor(widget.batch.id!, DateTime.now());
-    final staffList = await StaffHelper.getAllStaff();
+    staffHelper = StaffHelper(firestore);
+    staffAssignmentHelper = StaffAssignmentHelper(firestore);
+    final currentStaff = await staffAssignmentHelper.getStaffFor(widget.batch.id!, DateTime.now());
+    final staffList = await staffHelper.getAllStaff();
     setState(() {
       nameController = TextEditingController(text: widget.batch.name);
       addressController = TextEditingController(text: widget.batch.address);
       selectedDays = widget.batch.scheduleDays;
       startTime = widget.batch.startTime;
       endTime = widget.batch.endTime;
+      location = widget.batch.location;
       fetchedInstructors = staffList;
 
       if (currentStaff != null) {
         selectedInstructorId = currentStaff.id;
+        selectedInstructor = currentStaff;
       }
     });
   }
@@ -86,6 +101,11 @@ class EditBatchDialogState extends State<EditBatchDialog> {
               style: Theme.of(context).textTheme.bodySmall,
             ),
             SizedBox(height: 16),
+            IconButton(
+              onPressed: _getLocation,
+              icon: Icon(Icons.location_pin, color: Colors.blue,),
+              tooltip: 'Change location',
+            ),
             Text(
               'Select Days of the Week',
               style: TextStyle(fontWeight: FontWeight.bold),
@@ -169,10 +189,14 @@ class EditBatchDialogState extends State<EditBatchDialog> {
                   child: Text(staff.name),
                 );
               }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  selectedInstructorId = value;
-                });
+              onChanged: (value) async {
+                if (value != null) {
+                  selectedInstructor = await staffHelper.getStaffForId(value);
+                  setState(() {
+                      selectedInstructorId = value;
+                  });
+                }
+
               },
             ),
             SizedBox(height: 16),
@@ -205,9 +229,14 @@ class EditBatchDialogState extends State<EditBatchDialog> {
             widget.batch.scheduleDays = selectedDays;
             widget.batch.startTime = startTime;
             widget.batch.endTime = endTime;
+            widget.batch.location = location;
+
+            if (selectedInstructor!.joiningDate.isAfter(_startDate)) {
+              UIUtils.showErrorDialog(context, 'Error', 'Start date cannot be before staff joining date ${selectedInstructor!.joiningDate}');
+            }
 
             await batchHelper.updateBatch(widget.batch);
-            await StaffAssignmentHelper.assignStaff(
+            await staffAssignmentHelper.assignStaff(
               widget.batch.id!,
               selectedInstructorId!,
               _startDate,
@@ -226,10 +255,14 @@ class EditBatchDialogState extends State<EditBatchDialog> {
 
 
   void _selectFromDate(TextEditingController controller) async {
+    DateTime firstDate = DateTime(2000);
+    if (selectedInstructor != null) {
+      firstDate = selectedInstructor!.joiningDate;
+    }
     DateTime? selectedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
+      firstDate: firstDate,
       lastDate: DateTime(2101),
     );
 
@@ -237,6 +270,30 @@ class EditBatchDialogState extends State<EditBatchDialog> {
       setState(() {
         _startDate = selectedDate;
         controller.text = TimeOfDayUtils.dateTimeToString(selectedDate);
+      });
+    }
+  }
+
+  Future<void> _getLocation() async {
+
+    LocationResult? locationResult = await LocationUtils.pickLocation(
+      context,
+      location,
+    );
+
+    if (locationResult == null) {
+      return;
+    }
+
+    if (locationResult.formattedAddress != null &&
+        locationResult.latLng != null)  {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        addressController.text = locationResult.formattedAddress!;
+        location = GeoPoint(
+            locationResult.latLng!.latitude, locationResult.latLng!.longitude);
       });
     }
   }

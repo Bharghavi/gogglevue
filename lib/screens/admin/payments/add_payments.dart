@@ -1,3 +1,4 @@
+import 'package:Aarambha/managers/database_manager.dart';
 import 'package:flutter/material.dart';
 import '../../../Utils/time_of_day_utils.dart';
 
@@ -36,9 +37,19 @@ class AddPaymentPageState extends State<AddPaymentPage> {
   DateTime? validFrom;
   DateTime? validTo;
 
+  late StudentHelper studentHelper;
+  late StudentBatchHelper studentBatchHelper;
+
   @override
   void initState() {
     super.initState();
+    initialize();
+  }
+
+  Future<void> initialize() async {
+    final firestore = await DatabaseManager.getAdminDatabase();
+    studentHelper = StudentHelper(firestore);
+    studentBatchHelper = StudentBatchHelper(firestore);
     if (widget.selectedStudent != null) {
       selectedStudent = widget.selectedStudent;
       fetchBatch(selectedStudent!);
@@ -51,7 +62,7 @@ class AddPaymentPageState extends State<AddPaymentPage> {
     setState(() {
       isLoading = true;
     });
-    final fetchedStudents = await StudentHelper.fetchAllStudents();
+    final fetchedStudents = await studentHelper.fetchAllStudents();
     setState(() {
       students = fetchedStudents;
       isLoading = false;
@@ -62,7 +73,7 @@ class AddPaymentPageState extends State<AddPaymentPage> {
     setState(() {
       isLoading = true;
     });
-    final fetchedBatches = await StudentBatchHelper.getBatchesForStudent(studentId);
+    final fetchedBatches = await studentBatchHelper.getBatchesForStudent(studentId);
     setState(() {
       batches = fetchedBatches;
       isLoading = false;

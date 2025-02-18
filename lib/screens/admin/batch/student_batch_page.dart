@@ -1,3 +1,5 @@
+import 'package:Aarambha/Utils/location_utils.dart';
+import 'package:Aarambha/managers/database_manager.dart';
 import 'package:flutter/material.dart';
 import '../../../Utils/time_of_day_utils.dart';
 import '../../../helpers/staff_assignment_helper.dart';
@@ -7,7 +9,6 @@ import '../../../Utils/ui_utils.dart';
 import '../../../models/batch.dart';
 import '../../../models/student.dart';
 import '../../../helpers/student_batch_helper.dart';
-import 'edit_batch_dialog.dart';
 
 class StudentBatchPage extends StatefulWidget {
   final Batch batch;
@@ -27,9 +28,19 @@ class StudentBatchPageState extends State<StudentBatchPage> {
   String staffName = '';
   DateTime firstDate = DateTime(2000);
 
+  late StudentBatchHelper studentBatchHelper;
+  late StaffAssignmentHelper staffAssignmentHelper;
+
   @override
   void initState() {
     super.initState();
+    initialize();
+  }
+
+  Future<void> initialize() async {
+    final firestore = await DatabaseManager.getAdminDatabase();
+    studentBatchHelper = StudentBatchHelper(firestore);
+    staffAssignmentHelper = StaffAssignmentHelper(firestore);
     fetchStudentsForBatch();
   }
 
@@ -38,17 +49,16 @@ class StudentBatchPageState extends State<StudentBatchPage> {
       setState(() {
         isLoading = true;
       });
-      final studentList = await StudentBatchHelper.fetchAllStudentsFor(widget.batch.id!);
-      final fetchStudentsNotInBatch = await StudentBatchHelper.fetchAllStudentsNotInBatch(widget.batch.id!);
-      final fetchedStaff = await StaffAssignmentHelper.getStaffFor(widget.batch.id!, DateTime.now());
-      final fetchedFirstDate = await StaffAssignmentHelper.getFirstDateForBatch(widget.batch.id!);
+      final studentList = await studentBatchHelper.fetchAllStudentsFor(widget.batch.id!);
+      final fetchStudentsNotInBatch = await studentBatchHelper.fetchAllStudentsNotInBatch(widget.batch.id!);
+      final fetchedStaff = await staffAssignmentHelper.getStaffFor(widget.batch.id!, DateTime.now());
       setState(() {
         studentsNotInBatch.addAll(fetchStudentsNotInBatch);
         studentsInBatch.addAll(studentList);
         if (fetchedStaff != null) {
           staffName = fetchedStaff.name;
         }
-        firstDate = fetchedFirstDate;
+        firstDate = widget.batch.startDate;
         isLoading = false;
       });
 
@@ -156,7 +166,7 @@ class StudentBatchPageState extends State<StudentBatchPage> {
         isLoading = true;
       });
       try {
-        await StudentBatchHelper.addStudentToBatch(
+        await studentBatchHelper.addStudentToBatch(
           selectedStudent!.id!,
           widget.batch.id!,
           joiningDate!,
@@ -192,7 +202,7 @@ class StudentBatchPageState extends State<StudentBatchPage> {
         setState(() {
           isLoading = true;
         });
-        StudentBatchHelper.deleteStudentFromBatch(student.id!, widget.batch.id!).then((_) {
+        studentBatchHelper.deleteStudentFromBatch(student.id!, widget.batch.id!).then((_) {
           setState(() {
             studentsInBatch.remove(student);
             studentsNotInBatch.add(student);
@@ -244,7 +254,7 @@ class StudentBatchPageState extends State<StudentBatchPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               BatchDetailsCard(batch: widget.batch, staffName: staffName,
-                       onEdit: () => openEditDialog(context, widget.batch)),
+                       onEdit: () => openMapLocation(widget.batch)),
               // Students list section
               Expanded(
                 child: studentsInBatch.isEmpty
@@ -263,6 +273,13 @@ class StudentBatchPageState extends State<StudentBatchPage> {
                     return Card(
                       margin: EdgeInsets.all(8),
                       child: ListTile(
+                        leading: student.profilePic != null
+                            ? CircleAvatar(
+                          backgroundImage: NetworkImage(student.profilePic!),
+                        )
+                            : CircleAvatar(
+                          child: Icon(Icons.person),
+                        ),
                         title: Text(student.name, style: Theme.of(context).textTheme.bodyMedium,),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min, // Ensures the row takes up minimal space
@@ -272,7 +289,11 @@ class StudentBatchPageState extends State<StudentBatchPage> {
                               onPressed: () => _makeCall(student.phone),
                             ),
                             IconButton(
-                              icon: Icon(color: Colors.blue, Icons.message_rounded),
+                              icon: Image.asset(
+                                'assets/icon/WhatsApp_icon.png',
+                                width: 24,
+                                height: 24,
+                              ),
                               onPressed: () => _sendMessage(student.phone),
                             ),
                             IconButton(
@@ -301,16 +322,9 @@ class StudentBatchPageState extends State<StudentBatchPage> {
     );
   }
 
-  void openEditDialog(BuildContext context, Batch batch) async {
-    final updatedBatch = await showDialog<Batch>(
-      context: context,
-      builder: (context) => EditBatchDialog(batch: batch),
-    );
-
-    if (updatedBatch != null) {
-      setState(() {
-        batch = updatedBatch;
-      });
+  void openMapLocation(Batch batch) async {
+    if (batch.location != null) {
+      LocationUtils.openGoogleMaps(batch.location!);
     }
   }
 }

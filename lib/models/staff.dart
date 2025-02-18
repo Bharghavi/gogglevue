@@ -1,22 +1,27 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Staff {
-  final String name;
+  String name;
   final String? id;
-  final DateTime dob;
-  final String address;
-  final String email;
-  final String phone;
-  final String adminId;
+  DateTime? dob;
+  String? address;
+  String? email;
+  String phone;
+  String? profilePic;
+  DateTime joiningDate;
+  double monthlyPayment;
+
 
   Staff({
     required this.name,
     this.id,
-    required this.email,
+    this.email,
     required this.phone,
-    required this.address,
-    required this.dob,
-    required this.adminId
+    this.address,
+    this.dob,
+    this.profilePic,
+    required this.joiningDate,
+    required this.monthlyPayment,
   });
 
   factory Staff.fromFirestore(Map<String, dynamic> data, String documentId) {
@@ -26,8 +31,10 @@ class Staff {
       email: data['email'] ?? '',
       phone: data['phone'] ?? '',
       address: data['address']?? '',
-      dob: (data['dob'] as Timestamp).toDate(),
-      adminId: data['adminId'] ?? '',
+      dob: data['dob'] == null ? null : (data['dob'] as Timestamp).toDate(),
+      profilePic: data['profilePic']?? '',
+      joiningDate: (data['joiningDate'] as Timestamp).toDate(),
+      monthlyPayment: data['monthlyPayment']?? 0.0 ,
     );
   }
 
@@ -37,8 +44,10 @@ class Staff {
       'email': email,
       'phone': phone,
       'address': address,
-      'dob': Timestamp.fromDate(dob),
-      'adminId': adminId,
+      'dob': dob == null ? null : Timestamp.fromDate(dob!),
+      'profilePic': profilePic,
+      'joiningDate': Timestamp.fromDate(joiningDate),
+      'monthlyPayment': monthlyPayment,
     };
   }
 }

@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
 import '../../Utils/time_of_day_utils.dart';
 import '../../Utils/ui_utils.dart';
 
@@ -383,7 +385,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
   Future<void> _getLocation() async {
     LocationResult? locationResult = await LocationUtils.pickLocation(
       context,
-      _locationController.text,
+      location,
     );
 
     if (locationResult == null) {

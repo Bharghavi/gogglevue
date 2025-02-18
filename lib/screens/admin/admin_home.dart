@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import '../../helpers/admin_helper.dart';
 import '../settings_page.dart';
 import 'batch/batch_list_page.dart';
-import 'staff_page.dart';
+import 'staff/staff_page.dart';
 import 'course/course_page.dart';
-import 'student_page.dart';
+import 'student/student_page.dart';
 import 'payments/payment_page.dart';
 import 'admin_home_page.dart';
 
